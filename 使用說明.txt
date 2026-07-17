@@ -1,0 +1,22 @@
+峻峻數學大冒險 V2.0 一、二年級外接有聲版
+
+上傳 GitHub：
+請先解壓縮，然後把以下內容全部上傳到倉庫根目錄：
+index.html
+app.js
+style.css
+data 資料夾
+audio 資料夾
+使用說明.txt
+
+重要：
+1. 不要把外層「峻峻數學大冒險...」資料夾整個套進倉庫內，index.html 必須直接在倉庫首頁。
+2. 不要只上傳 ZIP。
+3. data 和 audio 資料夾不可刪除或改名。
+4. iPhone/iPad 第一次使用聲音，要先點一下「聲音開」或任意按鈕。
+
+更新方法：
+課程：data/courses.js
+題庫：data/questions.js
+設定：data/config.js
+音效：audio 資料夾
