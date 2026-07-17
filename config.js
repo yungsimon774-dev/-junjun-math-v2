@@ -1,1 +1,1 @@
-window.MATH_CONFIG={"appName": "峻峻數學大冒險", "version": "V2.0 一、二年級外接有聲版", "childName": "峻峻", "parentPin": "2026", "speechRate": 0.88, "speechPitch": 1.05};
+window.MATH_CONFIG={"appName": "峻峻数学大冒险", "version": "V3.0 简体版", "childName": "峻峻", "parentPin": "2026", "speechRate": 0.88, "speechPitch": 1.0, "speechLang": "zh-CN"};
