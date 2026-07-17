@@ -1,11 +1,100 @@
-<!doctype html><html lang="zh-HK"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><title>峻峻數學大冒險</title><link rel="stylesheet" href="./style.css"></head><body><main class="app">
-<section class="hero"><div class="top"><div><h1 id="title">峻峻數學大冒險</h1><div id="ver">V2.0</div></div><button id="sound" class="sound">🔊 聲音開</button></div><div class="stats"><div class="stat"><b id="stars">0</b>⭐ 星星</div><div class="stat"><b id="done">0</b>🏁 完成</div><div class="stat"><b id="acc">—</b>🎯 正確率</div></div></section>
-<nav class="tabs"><button class="tab active" data-tab="home">🗺️ 課程</button><button class="tab" data-tab="game">🎮 闖關</button><button class="tab" data-tab="report">📊 家長報告</button></nav>
-<div id="loadError" class="error hidden"><b>外接資料沒有載入。</b><br>請確認上傳了 data/config.js、data/courses.js、data/questions.js，並保留原來資料夾結構。</div>
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>峻峻數學大冒險</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+<section class="hero">
+  <div class="top">
+    <div>
+      <h1 id="title">峻峻數學大冒險</h1>
+      <div id="ver">V2.1 iPhone平鋪外接有聲版</div>
+    </div>
+    <button id="sound" class="sound">🔊 聲音開</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="stars">0</b>⭐ 星星</div>
+    <div class="stat"><b id="done">0</b>🏁 完成</div>
+    <div class="stat"><b id="acc">—</b>🎯 正確率</div>
+  </div>
+</section>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="home">🗺️ 課程</button>
+  <button class="tab" data-tab="game">🎮 闖關</button>
+  <button class="tab" data-tab="report">📊 家長報告</button>
+</nav>
+
+<div id="loadError" class="error hidden">
+  <b>外接資料沒有載入。</b><br>
+  請確認倉庫首頁有 config.js、courses.js、questions.js。
+</div>
+
 <section id="home" class="panel active">
-<div id="gradeSelect"><h2>俊俊要學哪個年級？</h2><div class="gradeChooser"><button class="grade g1" data-grade="1"><div class="big">🌱</div><h2>一年級複習</h2><div>鞏固基礎與查漏補缺</div></button><button class="grade g2" data-grade="2"><div class="big">🚀</div><h2>二年級主課程</h2><div>乘除法、加減法、應用題和思維</div></button></div></div>
-<div id="courseArea" class="hidden"><div class="courseHeader"><h2 id="gradeTitle">二年級課程</h2><button id="back" class="back">← 選年級</button></div><div id="courses" class="courses"></div></div>
-<p class="note">全部課程和題庫均為外接檔案；題目按小學核心能力及「同步＋易錯＋思維」方式原創編排。</p></section>
-<section id="game" class="panel"><div class="card"><div class="courseHeader"><b id="gameTitle">請先選課程</b><span id="count"></span></div><div class="progress"><div id="fill" class="fill"></div></div><div id="question" class="question">到「課程」選擇關卡</div><div id="options" class="options"></div><div id="feedback" class="feedback">有中文讀題和答題音效。</div><div class="actions"><button id="read" class="secondary">🔊 讀題</button><button id="next" class="primary hidden">下一題 ➜</button></div></div></section>
-<section id="report" class="panel"><div class="card"><h2>家長學習報告</h2><div id="reportStats" class="reportGrid"></div><h3>最近錯題</h3><div id="mistakes"></div><button id="reset" class="secondary">清除紀錄</button><p class="note">預設家長密碼：2026，可在 data/config.js 修改。</p></div></section>
-</main><script src="./data/config.js"></script><script src="./data/courses.js"></script><script src="./data/questions.js"></script><script src="./app.js"></script></body></html>
+  <div id="gradeSelect">
+    <h2>峻峻要學哪個年級？</h2>
+    <div class="gradeChooser">
+      <button class="grade g1" data-grade="1">
+        <div class="big">🌱</div>
+        <h2>一年級複習</h2>
+        <div>鞏固基礎與查漏補缺</div>
+      </button>
+      <button class="grade g2" data-grade="2">
+        <div class="big">🚀</div>
+        <h2>二年級主課程</h2>
+        <div>乘除法、加減法、應用題和思維</div>
+      </button>
+    </div>
+  </div>
+
+  <div id="courseArea" class="hidden">
+    <div class="courseHeader">
+      <h2 id="gradeTitle">二年級課程</h2>
+      <button id="back" class="back">← 選年級</button>
+    </div>
+    <div id="courses" class="courses"></div>
+  </div>
+
+  <p class="note">課程、題庫和音效全部外接，但全部平鋪在倉庫首頁，方便 iPhone 直接覆蓋更新。</p>
+</section>
+
+<section id="game" class="panel">
+  <div class="card">
+    <div class="courseHeader">
+      <b id="gameTitle">請先選課程</b>
+      <span id="count"></span>
+    </div>
+    <div class="progress"><div id="fill" class="fill"></div></div>
+    <div id="question" class="question">到「課程」選擇關卡</div>
+    <div id="options" class="options"></div>
+    <div id="feedback" class="feedback">有中文讀題和答題音效。</div>
+    <div class="actions">
+      <button id="read" class="secondary">🔊 讀題</button>
+      <button id="next" class="primary hidden">下一題 ➜</button>
+    </div>
+  </div>
+</section>
+
+<section id="report" class="panel">
+  <div class="card">
+    <h2>家長學習報告</h2>
+    <div id="reportStats" class="reportGrid"></div>
+    <h3>最近錯題</h3>
+    <div id="mistakes"></div>
+    <button id="reset" class="secondary">清除紀錄</button>
+    <p class="note">預設家長密碼：2026，可在 config.js 修改。</p>
+  </div>
+</section>
+</main>
+
+<script src="./config.js"></script>
+<script src="./courses.js"></script>
+<script src="./questions.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

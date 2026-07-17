@@ -1,22 +1,30 @@
-峻峻數學大冒險 V2.0 一、二年級外接有聲版
+峻峻數學大冒險 V2.1 iPhone平鋪外接有聲版
 
-上傳 GitHub：
-請先解壓縮，然後把以下內容全部上傳到倉庫根目錄：
+這版專門適合 iPhone + Safari + GitHub 網頁上傳。
+
+倉庫首頁必須直接看到：
 index.html
 app.js
 style.css
-data 資料夾
-audio 資料夾
-使用說明.txt
+config.js
+courses.js
+questions.js
+click.wav
+correct.wav
+wrong.wav
+finish.wav
 
-重要：
-1. 不要把外層「峻峻數學大冒險...」資料夾整個套進倉庫內，index.html 必須直接在倉庫首頁。
-2. 不要只上傳 ZIP。
-3. data 和 audio 資料夾不可刪除或改名。
-4. iPhone/iPad 第一次使用聲音，要先點一下「聲音開」或任意按鈕。
+更新方式：
+1. 解壓縮 ZIP。
+2. 在原來 GitHub 倉庫選 Add file / Upload files。
+3. 把以上全部檔案重新上傳。
+4. GitHub 顯示同名檔案時，直接提交覆蓋。
+5. 不用建立新倉庫，不用建立 data 或 audio 資料夾。
+6. 上傳完成後等 1 至 3 分鐘，再重新整理網站。
+7. 如果仍顯示舊畫面，可在網址最後加 ?v=21 再開一次。
 
-更新方法：
-課程：data/courses.js
-題庫：data/questions.js
-設定：data/config.js
-音效：audio 資料夾
+注意：
+- 不要只上傳 ZIP。
+- 不要漏掉 config.js、courses.js、questions.js。
+- 不要漏掉四個 WAV 音效。
+- 第一次使用聲音，要先點一下頁面按鈕。

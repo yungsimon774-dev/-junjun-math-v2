@@ -5,7 +5,7 @@ const cfg=window.MATH_CONFIG||{}, courses=window.MATH_COURSES||[], bank=window.M
 const KEY="junjun_math_v2";
 let st=JSON.parse(localStorage.getItem(KEY)||'{"stars":0,"done":[],"attempts":0,"correct":0,"mistakes":[]}');
 let grade=2, course=null, qs=[], idx=0, session=0, sound=true, locked=false;
-const snd={click:new Audio("./audio/click.wav"),correct:new Audio("./audio/correct.wav"),wrong:new Audio("./audio/wrong.wav"),finish:new Audio("./audio/finish.wav")};
+const snd={click:new Audio("./click.wav"),correct:new Audio("./correct.wav"),wrong:new Audio("./wrong.wav"),finish:new Audio("./finish.wav")};
 function play(x){if(!sound)return;try{snd[x].currentTime=0;snd[x].play()}catch(e){}}
 function say(t){if(!sound||!window.speechSynthesis)return; speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="zh-HK";u.rate=cfg.speechRate||.9;u.pitch=cfg.speechPitch||1;speechSynthesis.speak(u)}
 function save(){localStorage.setItem(KEY,JSON.stringify(st));header()}
