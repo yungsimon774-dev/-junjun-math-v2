@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>峻峻数学大冒险</title>
+<link rel="stylesheet" href="./style-v70.css">
+</head>
+<body>
+<div class="sky-decor" aria-hidden="true">
+  <i class="star s1">✦</i><i class="star s2">★</i><i class="star s3">✦</i><i class="star s4">★</i>
+  <div class="planet planet-a">🪐</div><div class="planet planet-b">🌎</div>
+  <div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+</div>
+<main class="app">
+<section class="hero game-panel">
+  <div class="profile-pill"><div class="avatar">👦🏻</div><div><b>峻峻</b><small>数学小勇士</small></div><span>⭐ <b id="profileStars">0</b></span></div>
+  <button class="gear" aria-label="设置">⚙️</button>
+  <div class="hero-character left-char" aria-hidden="true">🚀<span>👨‍🚀</span></div>
+  <div class="hero-character right-char" aria-hidden="true">🤖</div>
+  <div class="logo-wrap">
+    <div class="mini-name">峻峻</div>
+    <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
+    <div id="ver" class="version-ribbon">V7.0 儿童游戏界面 · 外接10000题版</div>
+  </div>
+  <div class="voiceControls">
+    <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
+    <button id="sound" class="pill-button pink">🔊 声音开</button>
+  </div>
+  <div class="dashboard-card">
+    <div class="stats">
+      <div class="stat"><span>⭐</span><b id="stars">0</b><small>星星</small></div>
+      <div class="stat"><span>🏅</span><b id="done">0</b><small>完成关卡</small></div>
+      <div class="stat"><span>🎯</span><b id="acc">—</b><small>正确率</small></div>
+    </div>
+    <div id="voiceStatus" class="voiceStatus">正在检测普通话系统语音…</div>
+  </div>
+  <div class="side-actions">
+    <button class="side-action reward">🎁<span>每日奖励</span></button>
+    <button class="side-action achievement">🏆<span>成就</span></button>
+  </div>
+</section>
+
+<nav class="tabs game-panel">
+  <button class="tab active" data-tab="home"><span>📚</span>课程</button>
+  <button class="tab" data-tab="game"><span>🎮</span>闯关</button>
+  <button class="tab" data-tab="report"><span>📊</span>家长报告</button>
+  <button class="tab" data-tab="report"><span>📝</span>学习记录</button>
+</nav>
+
+<div id="loadError" class="error hidden"><b>外接资料未加载。</b><br>请确认仓库首页有 config.js、courses.js、questions.js。</div>
+
+<section id="home" class="panel active">
+  <div id="gradeSelect">
+    <div class="section-title"><span>🌟</span><h2>选择今天的冒险世界</h2><span>🌟</span></div>
+    <div class="gradeChooser">
+      <button class="grade g1" data-grade="1">
+        <div class="grade-scene"><div class="grade-number">1</div><div class="mascot dino">🦖</div></div>
+        <div class="grade-copy"><h2>一年级复习</h2><div class="tag">5000题 · 100以内与综合思维</div><div class="mini-progress"><i></i></div><small>森林数学王国</small></div>
+        <span class="start-chip">开始学习 ▶</span>
+      </button>
+      <button class="grade g2" data-grade="2">
+        <div class="grade-scene"><div class="grade-number">2</div><div class="mascot astronaut">🧑‍🚀</div></div>
+        <div class="grade-copy"><h2>二年级主课程</h2><div class="tag">5000题 · 同步提高与综合挑战</div><div class="mini-progress"><i></i></div><small>星际数学基地</small></div>
+        <span class="start-chip">开始学习 ▶</span>
+      </button>
+    </div>
+  </div>
+  <div id="courseArea" class="hidden">
+    <div class="courseHeader"><h2 id="gradeTitle">二年级课程</h2><button id="back" class="back">← 返回冒险地图</button></div>
+    <div id="courses" class="courses"></div>
+  </div>
+  <div class="quick-row">
+    <button>🎯<span>口算训练</span></button><button>📖<span>思维拓展</span></button><button>🧮<span>数学工具</span></button><button>🏅<span>排行榜</span></button><button>📅<span>打卡任务</span></button>
+  </div>
+  <p class="note">课程、题库和音效全部外接，保留10000题题库与学习记录。</p>
+</section>
+
+<section id="game" class="panel">
+  <div class="card game-card">
+    <div class="courseHeader"><b id="gameTitle">请先选择课程</b><span id="count" class="count-badge"></span></div>
+    <div class="progress"><div id="fill" class="fill"></div></div>
+    <div class="question-stage"><div class="robot-tip">🤖</div><div id="question" class="question">请到“课程”选择关卡</div></div>
+    <div id="options" class="options"></div>
+    <div id="feedback" class="feedback">选择一个答案，开启数学冒险！</div>
+    <div class="actions"><button id="read" class="secondary">🔊 读题</button><button id="next" class="primary hidden">下一题 ➜</button></div>
+  </div>
+</section>
+
+<section id="report" class="panel">
+  <div class="card report-card"><h2>👨‍👩‍👦 家长学习报告</h2><div id="reportStats" class="reportGrid"></div><h3>📌 最近错题</h3><div id="mistakes"></div><button id="reset" class="secondary">清除记录</button><p class="note">默认家长密码：2026，可在 config.js 修改。</p></div>
+</section>
+</main>
+<div id="celebration" class="celebration" aria-hidden="true"></div>
+<script src="./config.js"></script><script src="./courses.js"></script><script src="./questions.js"></script><script src="./app-v70.js?v=7001"></script>
+</body></html>
