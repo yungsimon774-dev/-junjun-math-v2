@@ -2,110 +2,171 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>峻峻数学大冒险</title>
-<link rel="stylesheet" href="./style-v70.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#4d79ff">
+<link rel="manifest" href="manifest.json">
+<title>峻峻数学大冒险 V9.0</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(#5ba6ff,#eef7ff);color:#24304a;min-height:100vh}
+button,input{font:inherit}.app{max-width:760px;margin:auto;padding:14px 14px 90px}.card{background:#fff;border-radius:24px;box-shadow:0 10px 25px #1c4e8c25;padding:18px;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#4d79ff,#815cff);color:#fff;position:relative;overflow:hidden}.hero:after{content:"🚀";font-size:82px;position:absolute;right:12px;bottom:-12px;transform:rotate(-12deg)}
+h1{font-size:26px;margin:0 0 6px}.sub{opacity:.9}.stats{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}.pill{background:#ffffff2a;border:1px solid #ffffff50;border-radius:20px;padding:7px 12px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tab{border:0;border-radius:16px;padding:12px 6px;background:#edf2ff;color:#3754a6;font-weight:800}.tab.on{background:#4d79ff;color:#fff}
+.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mode{border:0;border-radius:20px;padding:18px 8px;background:linear-gradient(135deg,#fff5bf,#ffe08a);font-weight:900;color:#5b4300}.mode:nth-child(2){background:linear-gradient(135deg,#dfffe7,#99e6ad);color:#175d2e}.mode:nth-child(3){background:linear-gradient(135deg,#f0e2ff,#c7a4ff);color:#4e2685}.mode:nth-child(4){background:linear-gradient(135deg,#dff5ff,#91d9ff);color:#125377}
+.question{text-align:center}.q{font-size:48px;font-weight:900;margin:20px 0}.answer{width:170px;text-align:center;font-size:34px;font-weight:900;border:3px solid #b8c8ff;border-radius:18px;padding:10px}.actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:16px;padding:13px 18px;font-weight:900}.primary{background:#4d79ff;color:#fff}.teach{background:#ffcc4d;color:#624700}.next{background:#46bf77;color:#fff}.ghost{background:#edf2ff;color:#3d56a0}
+.feedback{min-height:34px;font-size:19px;font-weight:800;margin-top:12px}
+.teacher{display:none}.teacher.show{display:block}.step{background:#f5f8ff;border-left:6px solid #6b82ff;border-radius:14px;padding:12px;margin:10px 0;font-size:18px}.step strong{color:#3c55bf}.visual{background:#f8fbff;border-radius:18px;padding:14px;margin-top:12px}
+.place{display:flex;justify-content:center;gap:20px;align-items:flex-end}.col{text-align:center}.digit{font-size:42px;font-weight:900;background:#fff;border:3px solid #a7b7ee;border-radius:15px;padding:8px 16px;min-width:65px}.label{font-weight:700;color:#6a7390;margin-top:5px}
+.blocks{display:flex;flex-wrap:wrap;justify-content:center;gap:5px}.ten{width:18px;height:75px;border-radius:6px;background:#5a8cff}.one{width:18px;height:18px;border-radius:50%;background:#ff9f43}.numberline{display:flex;align-items:center;overflow-x:auto;padding:15px 4px}.n{min-width:42px;height:42px;border-radius:50%;background:#e9efff;display:grid;place-items:center;font-weight:800;margin-right:7px}.n.active{background:#ffcc4d}.reportrow{display:grid;grid-template-columns:100px 1fr 52px;gap:8px;align-items:center;margin:10px 0}.bar{height:13px;background:#e8edfb;border-radius:12px;overflow:hidden}.fill{height:100%;background:#6c84ff}
+.small{font-size:13px;color:#71809f}.hidden{display:none}.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dce5ff;display:flex;justify-content:center;gap:5px;padding:8px env(safe-area-inset-bottom,8px)}.nav{border:0;background:white;padding:8px 18px;border-radius:14px;font-weight:800;color:#6a7595}.nav.on{background:#edf2ff;color:#3d58c4}
+@media(max-width:450px){.q{font-size:40px}.hero:after{font-size:64px}.app{padding-left:10px;padding-right:10px}.card{border-radius:20px}}
+</style>
 </head>
 <body>
-<div class="sky-decor" aria-hidden="true">
-  <i class="star s1">✦</i><i class="star s2">★</i><i class="star s3">✦</i><i class="star s4">★</i>
-  <div class="planet planet-a">🪐</div><div class="planet planet-b">🌎</div>
-  <div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+<div class="app">
+<section class="card hero">
+<h1>峻峻数学大冒险</h1>
+<div class="sub">V9.0 · AI数学老师版 · 简体中文</div>
+<div class="stats"><div class="pill">⭐ <span id="stars">0</span></div><div class="pill">✅ <span id="done">0</span>题</div><div class="pill">🎯 <span id="rate">—</span></div></div>
+</section>
+
+<section id="homePage">
+<div class="card">
+<h2>今天学什么？</h2>
+<div class="modegrid">
+<button class="mode" onclick="start('add')">➕ 加法理解</button>
+<button class="mode" onclick="start('sub')">➖ 减法理解</button>
+<button class="mode" onclick="start('mixed')">🎯 混合练习</button>
+<button class="mode" onclick="start('word')">📖 应用题</button>
 </div>
-<main class="app">
-<section class="hero game-panel">
-  <div class="profile-pill"><div class="avatar">👦🏻</div><div><b>峻峻</b><small>数学小勇士</small></div><span>⭐ <b id="profileStars">0</b></span></div>
-  <button class="gear" aria-label="设置">⚙️</button>
-  <div class="hero-character left-char" aria-hidden="true">🚀<span>👨‍🚀</span></div>
-  <div class="hero-character right-char" aria-hidden="true">🤖</div>
-  <div class="logo-wrap">
-    <div class="mini-name">峻峻</div>
-    <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
-    <div id="ver" class="version-ribbon">V8.0 题库校验版 · 外接11000题版</div>
-  </div>
-  <div class="voiceControls">
-    <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
-    <button id="sound" class="pill-button pink">🔊 声音开</button>
-  </div>
-  <div class="dashboard-card">
-    <div class="stats">
-      <div class="stat"><span>⭐</span><b id="stars">0</b><small>星星</small></div>
-      <div class="stat"><span>🏅</span><b id="done">0</b><small>完成关卡</small></div>
-      <div class="stat"><span>🎯</span><b id="acc">—</b><small>正确率</small></div>
-    </div>
-    <div id="voiceStatus" class="voiceStatus">正在检测普通话系统语音…</div>
-  </div>
-  <div class="side-actions">
-    <button id="dailyReward" class="side-action reward">🎁<span>每日奖励</span></button>
-    <button id="achievementBtn" class="side-action achievement">🏆<span>成就</span></button>
-  </div>
-</section>
-
-<nav class="tabs game-panel">
-  <button class="tab active" data-tab="home"><span>📚</span>课程</button>
-  <button class="tab" data-tab="game"><span>🎮</span>闯关</button>
-  <button class="tab" data-tab="report"><span>📊</span>家长报告</button>
-  <button class="tab" data-tab="report"><span>📝</span>学习记录</button>
-</nav>
-
-<div id="loadError" class="error hidden"><b>外接资料未加载。</b><br>请确认仓库首页有 config.js、courses.js、questions.js。</div>
-
-<section id="home" class="panel active">
-  <div id="gradeSelect">
-    <div class="section-title"><span>🌟</span><h2>选择今天的冒险世界</h2><span>🌟</span></div>
-    <div class="gradeChooser">
-      <button class="grade g1" data-grade="1">
-        <div class="grade-scene"><div class="grade-number">1</div><div class="mascot dino">🦖</div></div>
-        <div class="grade-copy"><h2>一年级复习</h2><div class="tag">5500题 · 40类应用题与综合思维</div><div class="mini-progress"><i></i></div><small>森林数学王国</small></div>
-        <span class="start-chip">开始学习 ▶</span>
-      </button>
-      <button class="grade g2" data-grade="2">
-        <div class="grade-scene"><div class="grade-number">2</div><div class="mascot astronaut">🧑‍🚀</div></div>
-        <div class="grade-copy"><h2>二年级主课程</h2><div class="tag">5500题 · 45类应用题与综合挑战</div><div class="mini-progress"><i></i></div><small>星际数学基地</small></div>
-        <span class="start-chip">开始学习 ▶</span>
-      </button>
-    </div>
-  </div>
-  <div id="courseArea" class="hidden">
-    <div class="courseHeader"><h2 id="gradeTitle">二年级课程</h2><button id="back" class="back">← 返回冒险地图</button></div>
-    <div id="courses" class="courses"></div>
-  </div>
-  <div class="quick-row">
-    <button id="quickPractice">🎯<span>口算训练</span></button><button id="thinkingExpand">📖<span>思维拓展</span></button><button id="mathTools">🧮<span>数学工具</span></button><button id="achievementQuick">🏅<span>我的成就</span></button><button id="rewardQuick">📅<span>每日奖励</span></button>
-  </div>
-  <p class="note">课程、题库和音效全部外接，保留11000题题库、85类应用题关系与学习记录。</p>
-</section>
-
-<section id="game" class="panel">
-  <div class="card game-card">
-    <div class="courseHeader"><b id="gameTitle">请先选择课程</b><span id="count" class="count-badge"></span></div>
-    <div class="progress"><div id="fill" class="fill"></div></div>
-    <div class="question-stage"><div class="robot-tip">🤖</div><div id="question" class="question">请到“课程”选择关卡</div></div>
-    <div id="options" class="options"></div>
-    <div id="feedback" class="feedback">选择一个答案，开启数学冒险！</div>
-    <div class="actions"><button id="read" class="secondary">🔊 读题</button><button id="next" class="primary hidden">下一题 ➜</button></div>
-  </div>
-</section>
-
-<section id="report" class="panel">
-  <div class="card report-card"><h2>👨‍👩‍👦 家长学习报告</h2><div id="reportStats" class="reportGrid"></div><h3>📌 最近错题</h3><div id="mistakes"></div><button id="reset" class="secondary">清除记录</button><p class="note">默认家长密码：2026，可在 config.js 修改。</p></div>
-</section>
-</main>
-<div id="celebration" class="celebration" aria-hidden="true"></div>
-<div id="featureModal" class="feature-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="feature-backdrop" data-close-modal></div>
-  <section class="feature-sheet">
-    <button id="modalClose" class="modal-close" aria-label="关闭">✕</button>
-    <div id="modalIcon" class="modal-icon">🎁</div>
-    <h2 id="modalTitle">每日奖励</h2>
-    <div id="modalContent"></div>
-  </section>
 </div>
+<div class="card">
+<h2>老师模式</h2>
+<p>不会时点 <b>“教我”</b>，APP会用数位、小棒、数轴一步一步解释，不直接只给答案。</p>
+<p class="small">系统会记录：普通加法、进位加法、普通减法、退位减法和应用题。</p>
+</div>
+</section>
 
-<script src="./config.js"></script><script src="./courses.js"></script><script src="./questions.js"></script><script src="./app-v80.js?v=8001"></script>
+<section id="learnPage" class="hidden">
+<div class="card">
+<div class="tabs">
+<button class="tab on" data-level="20" onclick="setLevel(20,this)">20以内</button>
+<button class="tab" data-level="100" onclick="setLevel(100,this)">100以内</button>
+<button class="tab" data-level="1000" onclick="setLevel(1000,this)">1000以内</button>
+</div>
+</div>
+<div class="card question">
+<div id="kind" class="small"></div>
+<div id="wordText" style="font-size:21px;font-weight:800;line-height:1.55"></div>
+<div id="question" class="q"></div>
+<input id="answer" class="answer" inputmode="numeric" pattern="[0-9]*" aria-label="答案">
+<div class="actions">
+<button class="btn primary" onclick="check()">提交答案</button>
+<button class="btn teach" onclick="teachMe()">🧑‍🏫 教我</button>
+<button class="btn ghost" onclick="speakQuestion()">🔊 读题</button>
+<button class="btn next" onclick="newQuestion()">下一题</button>
+</div>
+<div id="feedback" class="feedback"></div>
+</div>
+<div id="teacher" class="card teacher">
+<h2>🧑‍🏫 我们一步一步来</h2>
+<div id="steps"></div>
+<div id="visual" class="visual"></div>
+<div class="actions"><button class="btn primary" onclick="speakLesson()">🔊 朗读讲解</button><button class="btn next" onclick="hideTeacher()">我明白了</button></div>
+</div>
+</section>
+
+<section id="reportPage" class="hidden">
+<div class="card"><h2>家长报告</h2><div id="report"></div><p id="advice"></p><button class="btn ghost" onclick="resetData()">清除学习记录</button></div>
+</section>
+</div>
+<div class="bottom">
+<button class="nav on" onclick="showPage('home',this)">🏠 首页</button>
+<button class="nav" onclick="showPage('learn',this)">✏️ 学习</button>
+<button class="nav" onclick="showPage('report',this)">📊 报告</button>
+</div>
+<script>
+const KEY='junjun_math_v90';
+let data=JSON.parse(localStorage.getItem(KEY)||'null')||{stars:0,done:0,correct:0,types:{}};
+let state={mode:'mixed',level:100,a:0,b:0,op:'+',answer:0,type:'',word:''};
+function save(){localStorage.setItem(KEY,JSON.stringify(data));updateStats()}
+function updateStats(){stars.textContent=data.stars;done.textContent=data.done;rate.textContent=data.done?Math.round(data.correct/data.done*100)+'%':'—'}
+function showPage(p,btn){homePage.classList.toggle('hidden',p!=='home');learnPage.classList.toggle('hidden',p!=='learn');reportPage.classList.toggle('hidden',p!=='report');document.querySelectorAll('.nav').forEach(x=>x.classList.remove('on'));if(btn)btn.classList.add('on');if(p==='report')renderReport()}
+function start(m){state.mode=m;showPage('learn',document.querySelectorAll('.nav')[1]);newQuestion()}
+function setLevel(n,btn){state.level=n;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));btn.classList.add('on');newQuestion()}
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function makeAdd(max){let a=rnd(1,max-1),b=rnd(1,max-a);return[a,b]}
+function makeSub(max){let a=rnd(2,max),b=rnd(1,a);return[a,b]}
+function classify(a,b,op){if(op==='+')return (a%10+b%10>=10)?'进位加法':'普通加法';return (a%10<b%10)?'退位减法':'普通减法'}
+const storiesAdd=[
+(a,b)=>`峻峻有${a}颗星星，又得到${b}颗星星，现在一共有多少颗？`,
+(a,b)=>`盒子里原来有${a}支彩笔，妈妈又放进${b}支，盒子里共有多少支？`,
+(a,b)=>`停车场有${a}辆车，又开来${b}辆，现在有多少辆？`
+];
+const storiesSub=[
+(a,b)=>`峻峻有${a}个积木，送给朋友${b}个，还剩多少个？`,
+(a,b)=>`树上有${a}只小鸟，飞走${b}只，还剩多少只？`,
+(a,b)=>`书架上有${a}本书，借走${b}本，还剩多少本？`
+];
+function newQuestion(){
+ teacher.classList.remove('show');feedback.textContent='';answer.value='';wordText.textContent='';
+ let op=state.mode==='add'?'+':state.mode==='sub'?'-':(Math.random()<.5?'+':'-');
+ let pair=op==='+'?makeAdd(state.level):makeSub(state.level);state.a=pair[0];state.b=pair[1];state.op=op;state.answer=op==='+'?state.a+state.b:state.a-state.b;state.type=classify(state.a,state.b,op);
+ if(state.mode==='word'){state.word=(op==='+'?storiesAdd:storiesSub)[rnd(0,2)](state.a,state.b);wordText.textContent=state.word;question.textContent='';kind.textContent='应用题 · '+state.type}else{state.word='';question.textContent=`${state.a} ${op} ${state.b} = ?`;kind.textContent=state.type}
+ setTimeout(()=>answer.focus(),100)
+}
+function ensureType(t){if(!data.types[t])data.types[t]={done:0,correct:0,help:0}}
+function check(){
+ let v=Number(answer.value);if(answer.value===''){feedback.textContent='先写一个答案哦';return}
+ ensureType(state.type);data.done++;data.types[state.type].done++;
+ if(v===state.answer){data.correct++;data.types[state.type].correct++;data.stars+=2;feedback.textContent='🎉 答对了！你真棒！';speak('答对了，你真棒！')}
+ else{feedback.textContent=`还差一点。答案不是${v}，点“教我”一起算。`;speak('还差一点，点教我，我们一起算。')}
+ save()
+}
+function teachMe(){ensureType(state.type);data.types[state.type].help++;save();renderLesson();teacher.classList.add('show');teacher.scrollIntoView({behavior:'smooth',block:'start'})}
+function renderLesson(){
+ let a=state.a,b=state.b,op=state.op,html='',vis='';
+ if(state.level<=20){
+   if(op==='+'){html=`<div class="step">先从 <strong>${a}</strong> 出发。</div><div class="step">再向前走 <strong>${b}</strong> 步。</div><div class="step">走到 <strong>${state.answer}</strong>，所以 ${a}+${b}=${state.answer}。</div>`}
+   else{html=`<div class="step">先从 <strong>${a}</strong> 出发。</div><div class="step">减去${b}，就是向后走 <strong>${b}</strong> 步。</div><div class="step">走到 <strong>${state.answer}</strong>，所以 ${a}-${b}=${state.answer}。</div>`}
+   vis=numberLine(a,b,op);
+ }else{
+   let ao=a%10,at=Math.floor(a/10),bo=b%10,bt=Math.floor(b/10);
+   if(op==='+'){
+     if(ao+bo>=10)html=`<div class="step">先算个位：<strong>${ao}+${bo}=${ao+bo}</strong>。</div><div class="step">${ao+bo}里面有1个十和${(ao+bo)%10}个一，所以个位写<strong>${(ao+bo)%10}</strong>，向十位进<strong>1</strong>。</div><div class="step">再算十位：${at}+${bt}+1=${Math.floor(state.answer/10)}。</div><div class="step">答案是 <strong>${state.answer}</strong>。</div>`;
+     else html=`<div class="step">先算个位：<strong>${ao}+${bo}=${ao+bo}</strong>。</div><div class="step">再算十位：<strong>${at}+${bt}=${at+bt}</strong>。</div><div class="step">合起来是 <strong>${state.answer}</strong>。</div>`;
+   }else{
+     if(ao<bo)html=`<div class="step">个位上 ${ao} 不够减 ${bo}。</div><div class="step">从十位借1个十，${ao}变成<strong>${ao+10}</strong>。</div><div class="step">个位：${ao+10}-${bo}=<strong>${(ao+10)-bo}</strong>。</div><div class="step">十位借走1后：${at}-1-${bt}=<strong>${Math.floor(state.answer/10)}</strong>。</div><div class="step">答案是 <strong>${state.answer}</strong>。</div>`;
+     else html=`<div class="step">先算个位：<strong>${ao}-${bo}=${ao-bo}</strong>。</div><div class="step">再算十位：<strong>${at}-${bt}=${at-bt}</strong>。</div><div class="step">答案是 <strong>${state.answer}</strong>。</div>`;
+   }
+   vis=placeValue(state.answer);
+ }
+ steps.innerHTML=html;visual.innerHTML=vis;
+}
+function numberLine(a,b,op){
+ let arr=[],start=op==='+'?a:a-b,end=op==='+'?a+b:a;
+ for(let i=start;i<=end;i++)arr.push(`<div class="n ${i===a||i===state.answer?'active':''}">${i}</div>`);
+ return `<b>数轴：</b><div class="numberline">${arr.join('')}</div><div class="small">${op==='+'?'向右走，数会变大':'向左走，数会变小'}</div>`
+}
+function placeValue(n){
+ let tens=Math.floor(n/10),ones=n%10,blocks='';
+ for(let i=0;i<Math.min(tens,20);i++)blocks+='<span class="ten"></span>';
+ for(let i=0;i<ones;i++)blocks+='<span class="one"></span>';
+ return `<div class="place"><div class="col"><div class="digit">${tens}</div><div class="label">十位</div></div><div class="col"><div class="digit">${ones}</div><div class="label">个位</div></div></div><hr style="border:0;border-top:1px solid #dfe7ff;margin:16px"><div class="blocks">${blocks}</div>`
+}
+function lessonText(){return Array.from(steps.querySelectorAll('.step')).map(x=>x.textContent).join('。')}
+function speak(t){try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=.83;speechSynthesis.speak(u)}catch(e){}}
+function speakQuestion(){speak(state.word||`${state.a}${state.op==='+'?'加':'减'}${state.b}等于多少`)}
+function speakLesson(){speak(lessonText())}
+function hideTeacher(){teacher.classList.remove('show');answer.focus()}
+function renderReport(){
+ const names=['普通加法','进位加法','普通减法','退位减法'];
+ let html='';let weak=null,weakRate=2;
+ names.forEach(n=>{let x=data.types[n]||{done:0,correct:0,help:0},r=x.done?x.correct/x.done:0;html+=`<div class="reportrow"><b>${n}</b><div class="bar"><div class="fill" style="width:${Math.round(r*100)}%"></div></div><span>${x.done?Math.round(r*100)+'%':'—'}</span></div><div class="small">完成${x.done}题 · 求助${x.help}次</div>`;if(x.done>=2&&r<weakRate){weakRate=r;weak=n}});
+ report.innerHTML=html;advice.innerHTML=weak?`建议今天重点练习：<b>${weak}</b>。先点“教我”看懂，再独立完成5题。`:'继续完成练习后，系统会自动找出薄弱类型。'
+}
+function resetData(){if(confirm('确定清除全部学习记录吗？')){data={stars:0,done:0,correct:0,types:{}};save();renderReport()}}
+updateStats();newQuestion();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
 </body></html>

@@ -1,0 +1,16 @@
+{
+  "name": "峻峻数学大冒险 V9.0 AI数学老师版",
+  "short_name": "峻峻数学V9",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#eef7ff",
+  "theme_color": "#4d79ff",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
