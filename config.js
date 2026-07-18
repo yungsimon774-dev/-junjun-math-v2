@@ -1,1 +1,1 @@
-window.MATH_CONFIG={appName:"峻峻数学大冒险",version:"V9.1 · V8原版融合 · AI数学老师 · 外接20000题",parentPin:"2026",speechRate:.9,speechPitch:1};
+window.MATH_CONFIG={appName:"峻峻数学大冒险",version:"V9.2 · 老师模式修正版 · 外接20000题",parentPin:"2026",speechRate:.9,speechPitch:1};
