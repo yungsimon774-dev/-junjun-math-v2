@@ -1,1 +1,0 @@
-window.MATH_CONFIG={"appName":"峻峻数学大冒险","version":"V6.4 普通话专用·外接10000题版","speechLang":"zh-CN","speechRate":0.9,"speechPitch":1,"parentPin":"2026"};
