@@ -1,0 +1,12 @@
+{
+  "version": "V8.0",
+  "total": 20000,
+  "g1_apply": 5000,
+  "g2_apply": 5000,
+  "g1_application_kinds": 200,
+  "g2_application_kinds": 200,
+  "invalid_answer_indexes": 0,
+  "duplicate_options": 0,
+  "nearest_ten_with_5": 0,
+  "duplicate_options_fixed": 19
+}
