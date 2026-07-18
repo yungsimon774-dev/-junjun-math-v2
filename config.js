@@ -1,0 +1,1 @@
+window.MATH_CONFIG={appName:"峻峻数学大冒险",version:"V8.0 旗舰版 · 200类应用题/年级 · 外接20000题",parentPin:"2026",speechRate:.9,speechPitch:1};
