@@ -21,3 +21,5 @@ button{font:inherit}.app{max-width:900px;margin:auto;padding:14px}
 @media(max-width:560px){.gradeChooser{grid-template-columns:1fr}.grade{min-height:130px}}
 
 .voiceControls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.voiceSelect{border:0;border-radius:14px;padding:10px 12px;font-size:16px;font-weight:700;background:#fff;color:#24324a;box-shadow:0 4px 12px rgba(0,0,0,.12)}@media(max-width:520px){.top{align-items:flex-start}.voiceControls{justify-content:flex-end}.voiceSelect,.sound{font-size:14px;padding:9px 10px}}
+
+.voiceStatus{font-size:12px;margin-top:8px;padding:6px 10px;background:rgba(255,255,255,.18);border-radius:10px;word-break:break-all}
