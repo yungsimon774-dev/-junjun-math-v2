@@ -24,3 +24,9 @@ html{min-height:100%;background:#91d9ff}body{margin:0;min-height:100vh;font-fami
 .place-box{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:350px;margin:auto}.place-box div{text-align:center;background:#fff;border:3px solid #9fb5ff;border-radius:16px;padding:9px}.place-box b{font-size:34px;display:block}.place-box small{color:#667394;font-weight:800}
 .story-guide{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}.story-guide b{width:100%;text-align:center}.story-guide span{background:#eaf1ff;border-radius:20px;padding:8px 11px;font-weight:800;color:#3552a2}
 @media(max-width:520px){.teacher-button{padding:12px 15px}.teach-step{font-size:16px}.place-box b{font-size:28px}}
+
+/* Build003: 等量代换独立直达入口 */
+.symbol-direct-card{margin:18px 0 22px;padding:18px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;border:4px solid #ffd84f;border-radius:28px;background:linear-gradient(135deg,#fff8c9,#fff,#e7f7ff);box-shadow:0 10px 0 #e7ad22,0 16px 28px rgba(36,82,150,.18);cursor:pointer}
+.symbol-direct-card:active{transform:translateY(5px);box-shadow:0 5px 0 #e7ad22}
+.symbol-direct-icons{font-size:42px;white-space:nowrap}.symbol-direct-copy{display:flex;flex-direction:column;gap:4px;color:#173d73}.symbol-direct-copy b{font-size:22px}.symbol-direct-copy span{font-size:18px;font-weight:800}.symbol-direct-copy small{font-size:13px;color:#526b8e}.symbol-direct-go{padding:10px 12px;border-radius:18px;background:#ff8a34;color:#fff;font-weight:900;white-space:nowrap;box-shadow:0 5px 0 #cf5f13}.symbol-tab{background:linear-gradient(#fff1a3,#ffd34d)!important;color:#673b00!important}
+@media(max-width:560px){.symbol-direct-card{grid-template-columns:auto 1fr}.symbol-direct-go{grid-column:1/-1;text-align:center}.symbol-direct-icons{font-size:34px}.symbol-direct-copy b{font-size:19px}.symbol-direct-copy span{font-size:16px}}
