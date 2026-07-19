@@ -27,7 +27,7 @@
   <div class="logo-wrap">
     <div class="mini-name">峻峻</div>
     <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
-    <div id="ver" class="version-ribbon">V11.0 · 长期稳定版</div>
+    <div id="ver" class="version-ribbon">V11长期版 · Build003 · 等量代换直达版</div>
   </div>
   <div class="voiceControls">
     <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
@@ -50,6 +50,7 @@
 <nav class="tabs game-panel">
   <button class="tab active" data-tab="home"><span>📚</span>课程</button>
   <button class="tab" data-tab="game"><span>🎮</span>闯关</button>
+  <button class="tab symbol-tab" id="directSymbolTab"><span>🍎</span>等量代换</button>
   <button class="tab" data-tab="report"><span>📊</span>家长报告</button>
   <button class="tab" data-tab="report"><span>📝</span>学习记录</button>
 </nav>
@@ -57,6 +58,11 @@
 <div id="loadError" class="error hidden"><b>外接资料未加载。</b><br>请确认仓库首页有 config.js、courses.js、questions.js。</div>
 
 <section id="home" class="panel active">
+  <div id="symbolDirectCard" class="symbol-direct-card" role="button" tabindex="0" aria-label="直接开始等量代换课程">
+    <div class="symbol-direct-icons">🍎 → 🍐</div>
+    <div class="symbol-direct-copy"><b>等量代换·独立课程</b><span>🍎＝3　🍐＝3个🍎　求🍐</span><small>点这里直接进入，不会混入比大小或普通逻辑题</small></div>
+    <div class="symbol-direct-go">开始 ▶</div>
+  </div>
   <div id="gradeSelect">
     <div class="section-title"><span>🌟</span><h2>选择今天的冒险世界</h2><span>🌟</span></div>
     <div class="gradeChooser">
@@ -79,7 +85,7 @@
   <div class="quick-row">
     <button id="quickPractice">🎯<span>口算训练</span></button><button id="thinkingExpand">📖<span>思维拓展</span></button><button id="mathTools">🧮<span>数学工具</span></button><button id="achievementQuick">🏅<span>我的成就</span></button><button id="rewardQuick">📅<span>每日奖励</span></button>
   </div>
-  <p class="note">课程、题库和音效全部外接；启动时自动自检。当前包含 20840 道题、22 个课程。</p>
+  <p class="note">课程、题库和音效全部外接；启动时自动自检。当前包含 22280 道题、22 个课程；其中等量代换独立课程1800题。</p>
 </section>
 
 <section id="game" class="panel">
@@ -121,6 +127,6 @@
   </section>
 </div>
 
-<script src="./config.js?v=11002"></script><script src="./courses.js?v=11002"></script><script src="./questions.js?v=11002"></script><script src="./app-v11.js?v=11002"></script>
+<script src="./config.js?v=11003"></script><script src="./courses.js?v=11003"></script><script src="./questions.js?v=11003"></script><script src="./app-v11.js?v=11003"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}</script>
 </body></html>

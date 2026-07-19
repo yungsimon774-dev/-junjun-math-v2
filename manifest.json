@@ -1,7 +1,7 @@
 {
-  "name": "峻峻数学大冒险 V11.0 长期稳定版",
+  "name": "峻峻数学大冒险 V11 Build003 等量代换直达版",
   "short_name": "峻峻数学",
-  "start_url": "./index.html?v=11000",
+  "start_url": "./index.html?v=11003",
   "display": "standalone",
   "background_color": "#0879e8",
   "theme_color": "#0879e8",
