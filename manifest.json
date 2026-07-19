@@ -1,16 +1,9 @@
 {
-  "name": "峻峻数学大冒险 V11 Build004 题型扩展版",
+  "name": "峻峻数学大冒险 V11 Build005 学习系统版",
   "short_name": "峻峻数学",
-  "start_url": "./index.html?v=11004",
+  "start_url": "./index.html?v=11005",
   "display": "standalone",
   "background_color": "#0879e8",
   "theme_color": "#0879e8",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
