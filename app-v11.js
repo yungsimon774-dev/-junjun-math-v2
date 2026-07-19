@@ -10,6 +10,30 @@ st={stars:0,done:[],attempts:0,correct:0,mistakes:[],rewardDate:"",rewardStreak:
 let grade=2, course=null, qs=[], idx=0, session=0, sessionAttempts=0, sound=true, locked=false;
 let mandarinVoice=null, voicesReady=false;
 const ROUND_SIZE=10;
+function normalizeKindName(kind){
+ return String(kind||"同步训练")
+  .replace(/·V8强化$/u,"")
+  .replace(/^[^·]{1,8}·/u,"")
+  .replace(/^[^\p{L}\p{N}]+/u,"")
+  .trim()||"同步训练";
+}
+function getGradeBankStats(targetGrade){
+ const sets=new Set(courses.filter(c=>Number(c.grade)===Number(targetGrade)).map(c=>c.set));
+ let questions=0;const coreKinds=new Set();const rawKinds=new Set();
+ sets.forEach(set=>(bank[set]||[]).forEach(q=>{
+   questions++;
+   rawKinds.add(String(q.kind||"同步训练"));
+   coreKinds.add(normalizeKindName(q.kind));
+ }));
+ return {questions,coreKinds:coreKinds.size,rawKinds:rawKinds.size,courses:sets.size};
+}
+function renderRealBankStats(){
+ const g1=getGradeBankStats(1),g2=getGradeBankStats(2);
+ const e1=$("#grade1Stats"),e2=$("#grade2Stats"),sum=$("#bankSummary");
+ if(e1)e1.textContent=`真实题库 · ${g1.coreKinds}类核心题型 · ${g1.questions.toLocaleString()}题`;
+ if(e2)e2.textContent=`真实题库 · ${g2.coreKinds}类核心题型 · ${g2.questions.toLocaleString()}题`;
+ if(sum)sum.textContent=`启动实时核对：共 ${(g1.questions+g2.questions).toLocaleString()} 道题、${g1.courses+g2.courses} 个课程；一年级 ${g1.coreKinds} 类核心题型，二年级 ${g2.coreKinds} 类核心题型。数字由题库自动计算，不再写死。`;
+}
 const snd={click:new Audio("./click.wav"),correct:new Audio("./correct.wav"),wrong:new Audio("./wrong.wav"),finish:new Audio("./finish.wav")};
 function play(x){if(!sound)return;try{snd[x].currentTime=0;snd[x].play()}catch(e){}}
 function updateVoiceStatus(msg){const el=$("#voiceStatus");if(el)el.textContent=msg||"只使用普通话；找不到普通话系统语音时不会改用广东话。"}
@@ -281,4 +305,5 @@ if(teachBtn)teachBtn.onclick=showTeacher;
 if(teacherSpeak)teacherSpeak.onclick=speakTeacher;
 if(teacherClose)teacherClose.onclick=closeTeacher;
 
+renderRealBankStats();
 })();
