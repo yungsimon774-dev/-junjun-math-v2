@@ -1,0 +1,10 @@
+{
+  "fixedTotal": 3125,
+  "byNoun": {
+    "苹果": 875,
+    "门票": 875,
+    "气球": 875,
+    "鱼": 500
+  },
+  "newThinkingQuestions": 360
+}
