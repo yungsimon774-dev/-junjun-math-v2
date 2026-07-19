@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>峻峻数学大冒险</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./style-v70.css?v=11004">
+<link rel="stylesheet" href="./style-v70.css?v=110051">
 </head>
 <body>
 <div class="sky-decor" aria-hidden="true">
@@ -27,7 +27,7 @@
   <div class="logo-wrap">
     <div class="mini-name">峻峻</div>
     <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
-    <div id="ver" class="version-ribbon">V11长期版 · Build004 · 题型扩展版</div>
+    <div id="ver" class="version-ribbon">V11长期版 · Build005 · 学习系统版</div>
   </div>
   <div class="voiceControls">
     <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
@@ -52,7 +52,7 @@
   <button class="tab" data-tab="game"><span>🎮</span>闯关</button>
   <button class="tab symbol-tab" id="directSymbolTab"><span>🍎</span>等量代换</button>
   <button class="tab" data-tab="report"><span>📊</span>家长报告</button>
-  <button class="tab" data-tab="report"><span>📝</span>学习记录</button>
+  <button class="tab" id="missionTab"><span>✅</span>今日任务</button>
 </nav>
 
 <div id="loadError" class="error hidden"><b>外接资料未加载。</b><br>请确认仓库首页有 config.js、courses.js、questions.js。</div>
@@ -63,6 +63,12 @@
     <div class="symbol-direct-copy"><b>等量代换·独立课程</b><span>🍎＝3　🍐＝3个🍎　求🍐</span><small>点这里直接进入，不会混入比大小或普通逻辑题</small></div>
     <div class="symbol-direct-go">开始 ▶</div>
   </div>
+
+  <section id="missionCard" class="mission-card">
+    <div class="mission-head"><div><b>✅ 今日学习任务</b><small id="missionSummary">完成任务可领取额外星星</small></div><button id="openMissions">查看任务</button></div>
+    <div class="mission-progress"><i id="missionFill"></i></div>
+    <div id="missionMini" class="mission-mini"></div>
+  </section>
   <div id="gradeSelect">
     <div class="section-title"><span>🌟</span><h2>选择今天的冒险世界</h2><span>🌟</span></div>
     <div class="gradeChooser">
@@ -113,7 +119,7 @@
 </section>
 
 <section id="report" class="panel">
-  <div class="card report-card"><h2>👨‍👩‍👦 家长学习报告</h2><div id="reportStats" class="reportGrid"></div><h3>📌 最近错题</h3><div id="mistakes"></div><button id="reset" class="secondary">清除记录</button><p class="note">默认家长密码：2026，可在 config.js 修改。</p></div>
+  <div class="card report-card"><h2>👨‍👩‍👦 家长学习报告</h2><div id="reportStats" class="reportGrid"></div><h3>📌 最近错题</h3><div id="mistakes"></div><div class="report-actions"><button id="retryMistakes" class="teacher-button">🔁 错题重练</button><button id="exportRecord" class="secondary">📤 导出记录</button><button id="reset" class="secondary">清除记录</button></div><p class="note">默认家长密码：2026，可在 config.js 修改。</p></div>
 </section>
 </main>
 <div id="celebration" class="celebration" aria-hidden="true"></div>
@@ -127,6 +133,6 @@
   </section>
 </div>
 
-<script src="./config.js?v=11004"></script><script src="./courses.js?v=11004"></script><script src="./questions.js?v=11004"></script><script src="./app-v11.js?v=11004"></script>
+<script src="./config.js?v=110051"></script><script src="./courses.js?v=110051"></script><script src="./questions.js?v=110051"></script><script src="./app-v11.js?v=110051"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}</script>
 </body></html>
