@@ -1,5 +1,14 @@
-const CACHE='junjun-math-v11-build004';
-const CORE=['./','./index.html','./style-v70.css','./config.js','./courses.js','./questions.js','./app-v11-build004','./manifest.json','./icon.svg','./click.wav','./correct.wav','./wrong.wav','./finish.wav'];
+const CACHE='junjun-math-v11-build004-fixed';
+const CORE=['./','./index.html','./style-v70.css','./config.js','./courses.js','./questions.js','./app-v11.js','./manifest.json','./icon.svg','./click.wav','./correct.wav','./wrong.wav','./finish.wav'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);const mutable=/\/(index\.html|config\.js|courses\.js|questions\.js|app-v11-build004'no-store'}).then(r=>{const x=r.clone();caches.open(CACHE).then(c=>c.put(e.request,x));return r}).catch(()=>caches.match(e.request)));}else{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));}});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  const u=new URL(e.request.url);
+  const mutable=/\/(index\.html|config\.js|courses\.js|questions\.js|app-v11\.js|sw\.js)$/.test(u.pathname);
+  if(mutable){
+    e.respondWith(fetch(e.request,{cache:'no-store'}).then(r=>{const x=r.clone();caches.open(CACHE).then(c=>c.put(e.request,x));return r}).catch(()=>caches.match(e.request)));
+  }else{
+    e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+  }
+});
