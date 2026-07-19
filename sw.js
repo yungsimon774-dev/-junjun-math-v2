@@ -1,4 +1,4 @@
-const CACHE='junjun-math-v11-build005-learning-r2';
+const CACHE='junjun-math-v11-build005-realtypes-r3';
 const CORE=['./','./index.html','./style-v70.css','./config.js','./courses.js','./questions.js','./app-v11.js','./manifest.json','./icon.svg','./click.wav','./correct.wav','./wrong.wav','./finish.wav'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
