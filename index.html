@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>峻峻数学大冒险</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./style-v70.css?v=110051">
+<link rel="stylesheet" href="./style-v70.css?v=110060">
 </head>
 <body>
 <div class="sky-decor" aria-hidden="true">
@@ -27,7 +27,7 @@
   <div class="logo-wrap">
     <div class="mini-name">峻峻</div>
     <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
-    <div id="ver" class="version-ribbon">V11长期版 · Build005 · 学习系统版</div>
+    <div id="ver" class="version-ribbon">V11长期版 · Build006 · 填空防猜版</div>
   </div>
   <div class="voiceControls">
     <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
@@ -98,6 +98,7 @@
   <div class="card game-card">
     <div class="courseHeader"><b id="gameTitle">请先选择课程</b><span id="count" class="count-badge"></span></div>
     <div class="progress"><div id="fill" class="fill"></div></div>
+    <div class="answer-mode-bar"><span>答题方式：<b id="answerModeText">自动混合</b></span><div><button data-answer-mode="mixed">混合</button><button data-answer-mode="input">填空</button><button data-answer-mode="choice">选择</button></div></div>
     <div class="question-stage"><div class="robot-tip">🤖</div><div id="question" class="question">请到“课程”选择关卡</div></div>
     <div id="options" class="options"></div>
     <div id="feedback" class="feedback">选择一个答案，开启数学冒险！</div>
@@ -107,7 +108,7 @@
       <button id="next" class="primary hidden">下一题 ➜</button>
     </div>
     <section id="teacherPanel" class="teacher-panel hidden">
-      <div class="teacher-head"><span>🧑‍🏫</span><div><b>数学老师一步一步教</b><small>先理解，再自己选择答案</small></div></div>
+      <div class="teacher-head"><span>🧑‍🏫</span><div><b>数学老师一步一步教</b><small>先理解，再自己作答</small></div></div>
       <div id="teacherSteps"></div>
       <div id="teacherVisual"></div>
       <div class="teacher-actions">
@@ -133,6 +134,6 @@
   </section>
 </div>
 
-<script src="./config.js?v=110051"></script><script src="./courses.js?v=110051"></script><script src="./questions.js?v=110051"></script><script src="./app-v11.js?v=110051"></script>
+<script src="./config.js?v=110060"></script><script src="./courses.js?v=110060"></script><script src="./questions.js?v=110060"></script><script src="./app-v11.js?v=110060"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}</script>
 </body></html>
