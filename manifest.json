@@ -1,9 +1,18 @@
 {
-  "name": "峻峻数学大冒险 V11 Build005 学习系统版",
-  "short_name": "峻峻数学",
-  "start_url": "./index.html?v=11005",
+  "name": "峻峻数学大冒险 V12 Build005 终极学习系统版",
+  "short_name": "峻峻数学 V12",
+  "start_url": "./index.html?v=120050",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0879e8",
-  "theme_color": "#0879e8",
-  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "background_color": "#8fdcff",
+  "theme_color": "#2468e8",
+  "description": "四阶段教学、自适应诊断、间隔复习、错因分析与长期外接题库",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

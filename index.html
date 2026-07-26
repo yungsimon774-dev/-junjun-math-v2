@@ -1,139 +1,210 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>峻峻数学大冒险</title>
-<link rel="manifest" href="./manifest.json">
-<link rel="stylesheet" href="./style-v70.css?v=110060">
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#2468e8">
+  <title>峻峻数学大冒险 V12</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./v12-style.css?v=120050">
 </head>
 <body>
-<div class="sky-decor" aria-hidden="true">
-  <i class="star s1">✦</i><i class="star s2">★</i><i class="star s3">✦</i><i class="star s4">★</i>
-  <div class="planet planet-a">🪐</div><div class="planet planet-b">🌎</div>
-  <div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
-</div>
-<main class="app">
-<section class="hero game-panel">
-  <div class="profile-pill"><div class="avatar">👦🏻</div><div><b>峻峻</b><small>数学小勇士</small></div><span>⭐ <b id="profileStars">0</b></span></div>
-  <button class="gear" aria-label="设置">⚙️</button>
-  <div class="hero-character left-char" aria-hidden="true">🚀<span>👨‍🚀</span></div>
-  <div class="hero-character right-char" aria-hidden="true">🤖</div>
-  <div class="logo-wrap">
-    <div class="mini-name">峻峻</div>
-    <h1 id="title"><span>数</span><span>学</span><span>大</span><span>冒</span><span>险</span></h1>
-    <div id="ver" class="version-ribbon">V11长期版 · Build006 · 填空防猜版</div>
-  </div>
-  <div class="voiceControls">
-    <button id="voiceTest" class="pill-button green">▶ 普通话试听</button>
-    <button id="sound" class="pill-button pink">🔊 声音开</button>
-  </div>
-  <div class="dashboard-card">
-    <div class="stats">
-      <div class="stat"><span>⭐</span><b id="stars">0</b><small>星星</small></div>
-      <div class="stat"><span>🏅</span><b id="done">0</b><small>完成关卡</small></div>
-      <div class="stat"><span>🎯</span><b id="acc">—</b><small>正确率</small></div>
-    </div>
-    <div id="voiceStatus" class="voiceStatus">正在检测普通话系统语音…</div>
-  </div>
-  <div class="side-actions">
-    <button id="dailyReward" class="side-action reward">🎁<span>每日奖励</span></button>
-    <button id="achievementBtn" class="side-action achievement">🏆<span>成就</span></button>
-  </div>
-</section>
-
-<nav class="tabs game-panel">
-  <button class="tab active" data-tab="home"><span>📚</span>课程</button>
-  <button class="tab" data-tab="game"><span>🎮</span>闯关</button>
-  <button class="tab symbol-tab" id="directSymbolTab"><span>🍎</span>等量代换</button>
-  <button class="tab" data-tab="report"><span>📊</span>家长报告</button>
-  <button class="tab" id="missionTab"><span>✅</span>今日任务</button>
-</nav>
-
-<div id="loadError" class="error hidden"><b>外接资料未加载。</b><br>请确认仓库首页有 config.js、courses.js、questions.js。</div>
-
-<section id="home" class="panel active">
-  <div id="symbolDirectCard" class="symbol-direct-card" role="button" tabindex="0" aria-label="直接开始等量代换课程">
-    <div class="symbol-direct-icons">🍎 → 🍐</div>
-    <div class="symbol-direct-copy"><b>等量代换·独立课程</b><span>🍎＝3　🍐＝3个🍎　求🍐</span><small>点这里直接进入，不会混入比大小或普通逻辑题</small></div>
-    <div class="symbol-direct-go">开始 ▶</div>
+  <div class="sky" aria-hidden="true">
+    <span class="planet">🪐</span><span class="rocket">🚀</span>
+    <i class="spark s1">✦</i><i class="spark s2">★</i><i class="spark s3">✦</i>
   </div>
 
-  <section id="missionCard" class="mission-card">
-    <div class="mission-head"><div><b>✅ 今日学习任务</b><small id="missionSummary">完成任务可领取额外星星</small></div><button id="openMissions">查看任务</button></div>
-    <div class="mission-progress"><i id="missionFill"></i></div>
-    <div id="missionMini" class="mission-mini"></div>
-  </section>
-  <div id="gradeSelect">
-    <div class="section-title"><span>🌟</span><h2>选择今天的冒险世界</h2><span>🌟</span></div>
-    <div class="gradeChooser">
-      <button class="grade g1" data-grade="1">
-        <div class="grade-scene"><div class="grade-number">1</div><div class="mascot dino">🦖</div></div>
-        <div class="grade-copy"><h2>一年级复习</h2><div class="tag" id="grade1Stats">正在核对真实题库…</div><div class="mini-progress"><i></i></div><small>森林数学王国</small></div>
-        <span class="start-chip">开始学习 ▶</span>
-      </button>
-      <button class="grade g2" data-grade="2">
-        <div class="grade-scene"><div class="grade-number">2</div><div class="mascot astronaut">🧑‍🚀</div></div>
-        <div class="grade-copy"><h2>二年级主课程</h2><div class="tag" id="grade2Stats">正在核对真实题库…</div><div class="mini-progress"><i></i></div><small>星际数学基地</small></div>
-        <span class="start-chip">开始学习 ▶</span>
-      </button>
-    </div>
-  </div>
-  <div id="courseArea" class="hidden">
-    <div class="courseHeader"><h2 id="gradeTitle">二年级课程</h2><button id="back" class="back">← 返回冒险地图</button></div>
-    <div id="courses" class="courses"></div>
-  </div>
-  <div class="quick-row">
-    <button id="quickPractice">🎯<span>口算训练</span></button><button id="thinkingExpand">📖<span>思维拓展</span></button><button id="mathTools">🧮<span>数学工具</span></button><button id="achievementQuick">🏅<span>我的成就</span></button><button id="rewardQuick">📅<span>每日奖励</span></button>
-  </div>
-  <p class="note" id="bankSummary">课程、题库和音效全部外接；启动时自动统计真实题量与核心题型数。</p>
-</section>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="profile">
+        <span class="avatar">👦🏻</span>
+        <div><b>峻峻</b><small id="profileLevel">数学探索者</small></div>
+      </div>
+      <div class="brand">
+        <small>峻峻</small>
+        <h1>数学大冒险</h1>
+        <span id="version">V12长期版 · Build005 · 终极学习系统版</span>
+      </div>
+      <div class="hero-actions">
+        <button id="voiceTest" aria-label="试听普通话">🔊<span>普通话</span></button>
+        <button id="settingsBtn" aria-label="学习设置">⚙️<span>设置</span></button>
+      </div>
+      <div class="stats">
+        <div><span>⭐</span><b id="statStars">0</b><small>星星</small></div>
+        <div><span>🎯</span><b id="statAccuracy">—</b><small>首次正确</small></div>
+        <div><span>🧠</span><b id="statMastery">—</b><small>掌握度</small></div>
+        <div><span>🔁</span><b id="statDue">0</b><small>待复习</small></div>
+      </div>
+      <div id="voiceStatus" class="voice-status">正在检测普通话系统语音…</div>
+    </header>
 
-<section id="game" class="panel">
-  <div class="card game-card">
-    <div class="courseHeader"><b id="gameTitle">请先选择课程</b><span id="count" class="count-badge"></span></div>
-    <div class="progress"><div id="fill" class="fill"></div></div>
-    <div class="answer-mode-bar"><span>答题方式：<b id="answerModeText">自动混合</b></span><div><button data-answer-mode="mixed">混合</button><button data-answer-mode="input">填空</button><button data-answer-mode="choice">选择</button></div></div>
-    <div class="question-stage"><div class="robot-tip">🤖</div><div id="question" class="question">请到“课程”选择关卡</div></div>
-    <div id="options" class="options"></div>
-    <div id="feedback" class="feedback">选择一个答案，开启数学冒险！</div>
-    <div class="actions">
-      <button id="read" class="secondary">🔊 读题</button>
-      <button id="teach" class="teacher-button">🧑‍🏫 教我</button>
-      <button id="next" class="primary hidden">下一题 ➜</button>
-    </div>
-    <section id="teacherPanel" class="teacher-panel hidden">
-      <div class="teacher-head"><span>🧑‍🏫</span><div><b>数学老师一步一步教</b><small>先理解，再自己作答</small></div></div>
-      <div id="teacherSteps"></div>
-      <div id="teacherVisual"></div>
-      <div class="teacher-actions">
-        <button id="teacherSpeak" class="secondary">🔊 朗读讲解</button>
-        <button id="teacherClose" class="primary">我明白了</button>
+    <nav class="main-nav" aria-label="主要功能">
+      <button class="nav-button active" data-panel="home"><span>🗺️</span>学习地图</button>
+      <button class="nav-button" data-panel="plan"><span>✅</span>今日计划</button>
+      <button class="nav-button" data-panel="game"><span>🎮</span>正在学习</button>
+      <button class="nav-button" data-panel="report"><span>📊</span>家长报告</button>
+    </nav>
+
+    <div id="loadError" class="load-error hidden"></div>
+
+    <section id="home" class="panel active">
+      <article class="smart-plan-card">
+        <div class="smart-icon">🧠</div>
+        <div>
+          <small>V12智能学习建议</small>
+          <h2 id="smartPlanTitle">正在分析峻峻的学习记录</h2>
+          <p id="smartPlanText">根据薄弱知识点、到期复习和新课程自动安排。</p>
+        </div>
+        <button id="smartStart">开始今天的学习</button>
+      </article>
+
+      <article id="diagnosticCard" class="diagnostic-card">
+        <div>🩺</div>
+        <section>
+          <b>15题能力诊断</b>
+          <span id="diagnosticCopy">先找到真正会的和需要补的，后面才会出得准。</span>
+        </section>
+        <button id="diagnosticStart">开始诊断</button>
+      </article>
+
+      <div class="grade-switch" role="group" aria-label="选择年级">
+        <button data-grade="1">一年级复习</button>
+        <button data-grade="2" class="active">二年级主课程</button>
+      </div>
+
+      <section class="map-section">
+        <div class="section-heading">
+          <div><small id="gradeEyebrow">二年级主课程</small><h2>知识星球地图</h2></div>
+          <span id="courseSummary">正在读取课程…</span>
+        </div>
+        <div id="courseGrid" class="course-grid"></div>
+      </section>
+
+      <p id="bankSummary" class="bank-summary">正在核对外接题库…</p>
+    </section>
+
+    <section id="plan" class="panel">
+      <div class="panel-title"><div><span>✅</span><h2>今日学习计划</h2></div><small>每天15分钟，少而准确</small></div>
+      <div id="dailyProgress" class="daily-progress"></div>
+      <div class="plan-grid">
+        <article class="plan-card review">
+          <span>🔁</span><div><b>到期复习</b><p id="dueCopy">正在计算…</p></div><button id="reviewStart">开始</button>
+        </article>
+        <article class="plan-card weak">
+          <span>🧩</span><div><b>薄弱知识点</b><p id="weakCopy">完成诊断后自动生成</p></div><button id="weakStart">强化</button>
+        </article>
+        <article class="plan-card reward">
+          <span>🎁</span><div><b>每日奖励</b><p id="rewardCopy">连续学习可获得更多星星</p></div><button id="rewardBtn">领取</button>
+        </article>
+        <article class="plan-card tools">
+          <span>🧰</span><div><b>数学工具箱</b><p>数位、长度、人民币与时间换算</p></div><button id="toolsBtn">打开</button>
+        </article>
+      </div>
+      <article class="why-card">
+        <h3>为什么今天这样安排？</h3>
+        <div id="planReason"></div>
+      </article>
+    </section>
+
+    <section id="game" class="panel">
+      <div id="emptyGame" class="empty-game">
+        <span>🎮</span><h2>还没有开始学习</h2><p>回到学习地图选择课程，或从今日计划开始。</p>
+        <button data-go-home>返回学习地图</button>
+      </div>
+      <article id="gameCard" class="game-card hidden">
+        <div class="game-head">
+          <div><small id="sessionType">四阶段学习</small><h2 id="gameTitle">课程名称</h2></div>
+          <span id="questionCount">1/12</span>
+        </div>
+        <div id="stageRail" class="stage-rail"></div>
+        <div class="progress-track"><i id="gameProgress"></i></div>
+        <div class="question-box">
+          <span class="robot">🤖</span>
+          <small id="questionSkill">知识点</small>
+          <div id="questionText">题目</div>
+        </div>
+
+        <section id="checkpointCard" class="checkpoint-card hidden">
+          <div><b>先完成第一步</b><span id="checkpointExpression"></span></div>
+          <input id="checkpointInput" inputmode="numeric" aria-label="第一步答案">
+          <button id="checkpointCheck">检查</button>
+          <small id="checkpointFeedback"></small>
+        </section>
+
+        <section id="tutorPanel" class="tutor-panel hidden">
+          <div class="tutor-head"><span>🧑‍🏫</span><div><b id="tutorTitle">一步一步学</b><small id="tutorMode">先理解，再作答</small></div></div>
+          <div id="tutorSteps"></div>
+          <div id="tutorVisual"></div>
+          <div class="tutor-actions">
+            <button id="moreHint">再给一个提示</button>
+            <button id="speakTutor">🔊 朗读讲解</button>
+            <button id="closeTutor">我明白了</button>
+          </div>
+        </section>
+
+        <div id="answerArea" class="answer-area"></div>
+        <div id="feedback" class="feedback">认真读题，再开始作答。</div>
+        <div class="game-actions">
+          <button id="readQuestion">🔊 读题</button>
+          <button id="hintBtn">💡 提示</button>
+          <button id="nextQuestion" class="primary hidden">下一题 ➜</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="report" class="panel">
+      <div class="panel-title"><div><span>📊</span><h2>家长学习报告</h2></div><small>首次作答与提示次数分开统计</small></div>
+      <div id="reportStats" class="report-stats"></div>
+      <article class="report-card">
+        <h3>最近7天学习趋势</h3>
+        <div id="trendChart" class="trend-chart"></div>
+      </article>
+      <article class="report-card">
+        <h3>优先巩固的知识点</h3>
+        <div id="masteryList" class="mastery-list"></div>
+      </article>
+      <article class="report-card">
+        <h3>主要错因</h3>
+        <div id="errorReasons" class="error-reasons"></div>
+      </article>
+      <article class="report-card">
+        <h3>最近错题与复习安排</h3>
+        <div id="mistakeList" class="mistake-list"></div>
+      </article>
+      <div class="report-actions">
+        <button id="exportRecord">📤 导出记录</button>
+        <button id="importRecord">📥 导入记录</button>
+        <button id="resetRecord">清除记录</button>
+        <input id="recordFile" class="hidden" type="file" accept="application/json,.json">
       </div>
     </section>
+  </main>
+
+  <div id="celebration" class="celebration" aria-hidden="true"></div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" data-close-modal></div>
+    <section class="modal-sheet">
+      <button id="modalClose" class="modal-close" aria-label="关闭">✕</button>
+      <div id="modalIcon" class="modal-icon">⚙️</div>
+      <h2 id="modalTitle">设置</h2>
+      <div id="modalContent"></div>
+    </section>
   </div>
-</section>
 
-<section id="report" class="panel">
-  <div class="card report-card"><h2>👨‍👩‍👦 家长学习报告</h2><div id="reportStats" class="reportGrid"></div><h3>📌 最近错题</h3><div id="mistakes"></div><div class="report-actions"><button id="retryMistakes" class="teacher-button">🔁 错题重练</button><button id="exportRecord" class="secondary">📤 导出记录</button><button id="reset" class="secondary">清除记录</button></div><p class="note">默认家长密码：2026，可在 config.js 修改。</p></div>
-</section>
-</main>
-<div id="celebration" class="celebration" aria-hidden="true"></div>
-<div id="featureModal" class="feature-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="feature-backdrop" data-close-modal></div>
-  <section class="feature-sheet">
-    <button id="modalClose" class="modal-close" aria-label="关闭">✕</button>
-    <div id="modalIcon" class="modal-icon">🎁</div>
-    <h2 id="modalTitle">每日奖励</h2>
-    <div id="modalContent"></div>
-  </section>
-</div>
-
-<script src="./config.js?v=110060"></script><script src="./courses.js?v=110060"></script><script src="./questions.js?v=110060"></script><script src="./app-v11.js?v=110060"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}</script>
-</body></html>
+  <script src="./v12-config.js?v=120050"></script>
+  <script src="./courses.js?v=120050"></script>
+  <script src="./v12-bank-foundation.js?v=120050"></script>
+  <script src="./v12-bank-application.js?v=120050"></script>
+  <script src="./v12-bank-visual.js?v=120050"></script>
+  <script src="./v12-bank-symbol.js?v=120050"></script>
+  <script src="./v12-bank-life.js?v=120050"></script>
+  <script src="./v12-skill-map.js?v=120050"></script>
+  <script type="module" src="./v12-app.js?v=120050"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}</script>
+</body>
+</html>
