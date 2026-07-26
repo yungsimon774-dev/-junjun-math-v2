@@ -1,0 +1,25 @@
+{
+  "version": "V12长期版 · Build005 · 终极学习系统版",
+  "build": "Build005",
+  "courses": 26,
+  "questionSets": 26,
+  "totalQuestions": 22456,
+  "gradeTotals": {
+    "1": 10086,
+    "2": 12370
+  },
+  "uniquePrompts": 19589,
+  "questionTemplates": 958,
+  "knowledgeMapCourses": 26,
+  "fillCapable": 21518,
+  "duplicateOptions": 0,
+  "invalidQuestions": 0,
+  "fourStageCourses": 26,
+  "diagnosticsVerified": 2,
+  "migrationVerified": true,
+  "offlineFiles": 21,
+  "errors": 0,
+  "warnings": [],
+  "validation": "通过",
+  "generatedAt": "2026-07-26T09:56:03.108Z"
+}
