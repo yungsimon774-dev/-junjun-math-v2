@@ -1,6 +1,6 @@
 import {V12Store,today} from "./v12-store.js";
 import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js";
-import {buildTutor,escapeHTML} from "./v12-tutor.js";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120070";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -157,7 +157,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`V12外接题库实时核对：${stats.courses}个课程 · ${stats.questions.toLocaleString()}题 · ${stats.skills}个知识点 · ${stats.templates}种题目结构 · ${stats.fillable.toLocaleString()}题可防猜作答`;
+  $("#bankSummary").textContent=`V12外接题库实时核对：${stats.courses}个课程 · ${stats.questions.toLocaleString()}题 · ${stats.skills}个知识点 · ${stats.templates}种题目结构 · ${stats.fillable.toLocaleString()}题可防猜作答 · ${stats.semanticRepairs}处旧题语义已自动修正`;
 }
 
 function showCourseChoice(courseId){
@@ -369,16 +369,23 @@ function renderCheckpoint(checkpoint){
 function renderTutor(lesson,modeText){
   $("#tutorTitle").textContent=lesson.title;
   $("#tutorMode").textContent=modeText;
-  $("#tutorSteps").innerHTML=lesson.steps.map((step,index)=>`<div class="tutor-step"><i>${index+1}</i><span>${escapeHTML(step)}</span></div>`).join("");
+  $("#tutorSteps").innerHTML=lesson.steps.map((step,index)=>`<div class="tutor-step ${String(step).startsWith("🔎")?"recovery":""}"><i>${index+1}</i><span>${escapeHTML(step)}</span></div>`).join("");
   $("#tutorVisual").innerHTML=lesson.visual||"";
   $("#moreHint").classList.toggle("hidden",!lesson.canShowMore);
   $("#tutorPanel").classList.remove("hidden");
   $("#speakTutor").onclick=()=>speak(lesson.speech);
 }
+function feedbackTutorHTML(q){
+  const lesson=buildTutor(q,{stage:"teach",reveal:true,hintLevel:10});
+  const steps=lesson.allSteps;
+  return `<div class="feedback-solution"><b>${escapeHTML(lesson.title)}</b>${steps.map(step=>`<span>${escapeHTML(step)}</span>`).join("")}</div>`;
+}
 function showTutor(reveal=false){
   const item=session.items[itemIndex];
-  const lesson=buildTutor(item.question,{stage:item.stage,reveal,hintLevel});
-  renderTutor(lesson,reveal?"完整讲解与答案":"只显示方法，不直接公布答案");
+  const mistakeEntry=!reveal?firstWrongEntry:null;
+  const mistakeReason=mistakeEntry?engine.classifyError(item.question,mistakeEntry):"";
+  const lesson=buildTutor(item.question,{stage:item.stage,reveal,hintLevel,mistakeEntry,mistakeReason});
+  renderTutor(lesson,reveal?"完整讲解与答案":lesson.recoveryApplied?"针对刚才答案的纠错提示":"只显示方法，不直接公布答案");
   $("#tutorPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -536,13 +543,13 @@ function finalizeAnswer({firstCorrect,recovered,entry}){
   revealCorrect(entry,firstCorrect||recovered);
   disableAnswers();
   if(firstCorrect){
-    $("#feedback").innerHTML=`✅ 首次答对！知识点掌握度更新为 <b>${updated.skillMastery}%</b>。<br>${escapeHTML(q.explain||"")}`;
+    $("#feedback").innerHTML=`✅ 首次答对！知识点掌握度更新为 <b>${updated.skillMastery}%</b>。${feedbackTutorHTML(q)}`;
     play("correct");celebrate(11);speak("答对了，真厉害");
   }else if(recovered){
-    $("#feedback").innerHTML=`🛠️ 自己改对了！首次错误仍会保留在统计里，但已记录“自主纠错”。<br>${escapeHTML(q.explain||"")}`;
+    $("#feedback").innerHTML=`🛠️ 自己改对了！首次错误仍会保留在统计里，但已记录“自主纠错”。${feedbackTutorHTML(q)}`;
     play("correct");celebrate(8);speak("自己改对了，这才是真正的进步");
   }else{
-    $("#feedback").innerHTML=`💡 正确答案：<b>${escapeHTML(q.options[q.answer])}</b><br>错因初步判断：<b>${escapeHTML(engine.classifyError(q,entry))}</b><br>${escapeHTML(q.explain||"")}`;
+    $("#feedback").innerHTML=`💡 正确答案：<b>${escapeHTML(q.options[q.answer])}</b><br>错因初步判断：<b>${escapeHTML(engine.classifyError(q,entry))}</b>${feedbackTutorHTML(q)}`;
     hintLevel=10;
     showTutor(true);
     play("wrong");speak("这题先弄明白，系统会安排同类题复习");
@@ -772,8 +779,17 @@ function runtimeSelfTest(){
   if(!window.MATH_V12_SKILL_MAP)problems.push("知识图谱未加载");
   if(stats.courses!==26)problems.push(`课程数异常：${stats.courses}`);
   if(stats.questions!==22456)problems.push(`题目数异常：${stats.questions}`);
+  if(stats.semanticRepairs!==55)problems.push(`旧题语义修正数异常：${stats.semanticRepairs}`);
   const intro=engine.getQuestion((engine.byCourse.get("g2u11")||[])[0]?.qid);
   if(intro?.prompt!=="🍎＝3，🍐＝3个🍎。🍐等于多少？")problems.push("等量代换首页题未锁定");
+  if(intro&&buildTutor(intro,{stage:"teach"}).methodId!=="symbol-substitution")problems.push("等量代换教学流程异常");
+  const reverse=engine.catalog.find(question=>question.prompt.includes("□×6-6=60"));
+  if(reverse&&buildTutor(reverse,{stage:"teach"}).methodId!=="reverse-operation")problems.push("逆向运算教学流程异常");
+  const sumDifference=engine.catalog.find(question=>/和是32，大数比小数多2/.test(question.prompt));
+  if(sumDifference&&buildTutor(sumDifference,{stage:"teach"}).methodId!=="sum-difference")problems.push("和差问题教学流程异常");
+  const dedicatedSamples=[/最接近哪个整十数/,/里面有几个十和几个一/,/余数是多少/,/从1连续加到/]
+    .map(pattern=>engine.catalog.find(question=>pattern.test(question.prompt))).filter(Boolean);
+  if(dedicatedSamples.some(question=>buildTutor(question,{stage:"teach"}).methodId==="concept"))problems.push("专属教学流程抽检异常");
   return problems;
 }
 

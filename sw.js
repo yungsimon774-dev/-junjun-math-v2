@@ -1,4 +1,4 @@
-const CACHE="junjun-math-v12-build005-ultimate-r1";
+const CACHE="junjun-math-v12-build007-maximum-teaching-r1";
 const CORE=[
   "./",
   "./index.html",

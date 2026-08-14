@@ -1,6 +1,6 @@
 window.MATH_V12_CONFIG={
   appName:"峻峻数学大冒险",
-  version:"V12长期版 · Build005 · 终极学习系统版",
+  version:"V12长期版 · Build007 · 终极学习系统版 · 最高能力教学版",
   schemaVersion:12,
   parentPin:"2026",
   defaultGrade:2,

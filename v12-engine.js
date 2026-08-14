@@ -65,9 +65,89 @@ function makeDistractor(correct,used,seed){
   }
   return `其他答案${seed+1}`;
 }
+
+function repairQuestion(source){
+  const question={...source,options:Array.isArray(source.options)?source.options.map(String):[]};
+  const repairs=[];
+  const setCorrect=value=>{
+    if(Number.isInteger(Number(question.answer))&&question.options[Number(question.answer)]!=null){
+      question.options[Number(question.answer)]=String(value);
+    }
+  };
+
+  let match=String(question.prompt||"").match(/两个数的和是(\d+)，大数比小数多(\d+)，大数是多少/);
+  if(match){
+    const sum=Number(match[1]);
+    const statedDifference=Number(match[2]);
+    const answer=Number(question.options[Number(question.answer)]);
+    const correctedDifference=answer*2-sum;
+    if(Number.isFinite(answer)&&correctedDifference>0&&correctedDifference!==statedDifference){
+      question.prompt=question.prompt.replace(`大数比小数多${statedDifference}`,`大数比小数多${correctedDifference}`);
+      const small=sum-answer;
+      question.explain=`先把多出的${correctedDifference}拿出来：${sum}-${correctedDifference}=${small*2}；再平均分：${small*2}÷2=${small}；大数是${small}+${correctedDifference}=${answer}。`;
+      repairs.push("和差关系奇偶修正");
+    }
+  }
+
+  match=String(question.prompt||"").match(/原有(\d+)([^，]+)，增加(\d+)([^，]+)，又用掉(\d+)([^，]+)，还剩多少/);
+  if(match){
+    const original=Number(match[1]);
+    const added=Number(match[3]);
+    const used=Number(match[5]);
+    const available=original+added;
+    if(used>available){
+      const remaining=Math.max(1,Math.floor(available/3));
+      const correctedUsed=available-remaining;
+      question.prompt=question.prompt.replace(`又用掉${used}`,`又用掉${correctedUsed}`);
+      question.explain=`先算增加后有多少：${original}+${added}=${available}；再算剩余：${available}-${correctedUsed}=${remaining}。`;
+      setCorrect(remaining);
+      repairs.push("负数库存情境修正");
+    }
+  }
+
+  match=String(question.prompt||"").match(/每支笔(\d+)元，买(\d+)支，付(\d+)元，应找回多少元/);
+  if(match){
+    const price=Number(match[1]);
+    const count=Number(match[2]);
+    const paid=Number(match[3]);
+    const cost=price*count;
+    if(paid<cost){
+      const correctedPaid=Math.ceil((cost+1)/10)*10;
+      const change=correctedPaid-cost;
+      question.prompt=question.prompt.replace(`付${paid}元`,`付${correctedPaid}元`);
+      question.explain=`先算总价：${price}×${count}=${cost}元；再算找零：${correctedPaid}-${cost}=${change}元。`;
+      setCorrect(change);
+      repairs.push("付款不足情境修正");
+    }
+  }
+
+  match=String(question.prompt||"").match(/^([^，]{2,3})有\d+(?:本书|个积木)，比\1(?:少|多)\d+(?:本|个)?，\1有多少/);
+  if(match){
+    const repeatedName=match[1];
+    const sourceName=repeatedName==="峻峻"?"乐乐":"峻峻";
+    question.prompt=question.prompt.replace(`${repeatedName}有`,`${sourceName}有`);
+    repairs.push("人物关系指代修正");
+  }
+
+  if(repairs.length){
+    const correct=String(question.options[Number(question.answer)]??"");
+    const used=new Set([correct]);
+    for(let index=0;index<question.options.length;index++){
+      if(index===Number(question.answer))continue;
+      let option=String(question.options[index]);
+      if(/^-\d/.test(option)||used.has(option))option=makeDistractor(correct,used,index);
+      question.options[index]=option;
+      used.add(option);
+    }
+  }
+  question.qualityRepairs=repairs;
+  return question;
+}
+
 function sanitizeQuestion(source,course,index){
-  const options=Array.isArray(source.options)?source.options.map(String):[];
-  const answer=Number(source.answer);
+  const repaired=repairQuestion(source);
+  const options=Array.isArray(repaired.options)?repaired.options.map(String):[];
+  const answer=Number(repaired.answer);
   const correct=options[answer];
   if(correct!=null){
     const used=new Set([String(correct)]);
@@ -79,7 +159,7 @@ function sanitizeQuestion(source,course,index){
       used.add(String(options[i]));
     }
   }
-  const q={...source,options,answer};
+  const q={...repaired,options,answer};
   q.courseId=course.id;
   q.courseTitle=course.title;
   q.set=course.set;
@@ -87,7 +167,7 @@ function sanitizeQuestion(source,course,index){
   q.kindName=normalizeKind(q.kind);
   q.skillId=`${course.id}::${q.kindName}`;
   q.template=templateOf(q.prompt);
-  q.qid=`${course.id}:${hashText(`${q.prompt}::${options.join("|")}`)}`;
+  q.qid=`${course.id}:${hashText(`${source.prompt}::${(source.options||[]).join("|")}`)}`;
   q.difficultyRank=difficultyRank(q.difficulty);
   return q;
 }
@@ -446,6 +526,27 @@ export class LearningEngine{
   classifyError(q,entry){
     const text=`${q.kind||""} ${q.prompt||""}`;
     const descriptor=answerDescriptor(q);
+    const enteredRaw=entry?.value??entry?.selectedValue;
+    const correctRaw=q.options[q.answer];
+    const enteredNumber=Number(enteredRaw);
+    const correctNumber=Number(correctRaw);
+    const explanation=normalizeExpression(q.explain||"");
+    const equationAnswers=[...explanation.matchAll(/-?\d+(?:[+\-×÷]-?\d+)+=(-?\d+)/g)].map(match=>Number(match[1]));
+    if(equationAnswers.length>=2&&Number.isFinite(enteredNumber)&&enteredNumber===equationAnswers[0]&&enteredNumber!==correctNumber)return "停在中间步骤";
+    const remainderPrompt=String(q.prompt||"").match(/(\d+)÷(\d+)/);
+    if(remainderPrompt&&Number.isFinite(enteredNumber)){
+      const quotient=Math.floor(Number(remainderPrompt[1])/Number(remainderPrompt[2]));
+      const remainder=Number(remainderPrompt[1])%Number(remainderPrompt[2]);
+      if(enteredNumber!==correctNumber&&(enteredNumber===quotient||enteredNumber===remainder))return "商和余数混淆";
+    }
+    const simple=explanation.match(/(-?\d+)([+\-×÷])(-?\d+)=(-?\d+)/);
+    if(simple&&Number.isFinite(enteredNumber)&&Number.isFinite(correctNumber)){
+      const first=Number(simple[1]),operator=simple[2],second=Number(simple[3]);
+      if(operator==="+"&&enteredNumber===Math.abs(first-second))return "把合并误看成求相差";
+      if(operator==="-"&&enteredNumber===first+second)return "把去掉误看成合并";
+      if(operator==="×"&&enteredNumber===first+second)return "把乘法只算成一次加法";
+      if(operator==="÷"&&enteredNumber===first*second)return "乘除关系看反";
+    }
     if(descriptor.type==="compound"||/单位|人民币|长度|时间|厘米|米|元|角/.test(text))return "单位与换算";
     if(/退位|不够减/.test(text))return "退位步骤";
     if(/进位/.test(text))return "进位步骤";
@@ -453,8 +554,6 @@ export class LearningEngine{
     if(/规律|周期|排序/.test(text))return "规律观察";
     if(/周长|图形|边长/.test(text))return "图形概念";
     if(/应用|一共|还剩|买|送|共有|每/.test(text))return "数量关系";
-    const correctNumber=Number(q.options[q.answer]);
-    const enteredNumber=Number(entry?.value??entry?.selectedValue);
     if(Number.isFinite(correctNumber)&&Number.isFinite(enteredNumber)){
       if(Math.abs(correctNumber-enteredNumber)<=2)return "计算细节";
       if(Math.abs(correctNumber-enteredNumber)%10===0)return "数位计算";
@@ -614,6 +713,7 @@ export class LearningEngine{
     const templates=new Set(this.catalog.map(q=>q.template));
     const skills=new Set(this.catalog.map(q=>q.skillId));
     const fillable=this.catalog.filter(q=>answerDescriptor(q).supported).length;
+    const semanticRepairs=this.catalog.reduce((sum,q)=>sum+Number(q.qualityRepairs?.length||0),0);
     return {
       courses:courses.length,
       sets:Object.keys(banks).length,
@@ -621,9 +721,10 @@ export class LearningEngine{
       uniquePrompts:uniquePrompts.size,
       templates:templates.size,
       skills:skills.size,
-      fillable
+      fillable,
+      semanticRepairs
     };
   }
 }
 
-export {normalizeKind,templateOf,mastery,dayString};
+export {normalizeKind,templateOf,mastery,dayString,repairQuestion};
