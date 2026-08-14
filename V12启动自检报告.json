@@ -1,6 +1,6 @@
 {
-  "version": "V12长期版 · Build005 · 终极学习系统版",
-  "build": "Build005",
+  "version": "V12长期版 · Build007 · 终极学习系统版 · 最高能力教学版",
+  "build": "Build007",
   "courses": 26,
   "questionSets": 26,
   "totalQuestions": 22456,
@@ -9,7 +9,7 @@
     "2": 12370
   },
   "uniquePrompts": 19589,
-  "questionTemplates": 958,
+  "questionTemplates": 956,
   "knowledgeMapCourses": 26,
   "fillCapable": 21518,
   "duplicateOptions": 0,
@@ -18,8 +18,42 @@
   "diagnosticsVerified": 2,
   "migrationVerified": true,
   "offlineFiles": 21,
+  "tutorValidation": {
+    "questionsGenerated": 22456,
+    "generationErrors": 0,
+    "validatedQuestions": 22456,
+    "sourceKindLabels": 557,
+    "methodProfiles": 43,
+    "genericRoutes": 0,
+    "verifiedEquations": 16316,
+    "guidedCheckpoints": 909,
+    "hiddenSolutionLeaks": 0,
+    "adaptiveRecoveryValidated": true,
+    "progressIdentityPreserved": true,
+    "feedbackUsesValidatedTutor": true,
+    "symbolQuestions": 1800,
+    "symbolQuestionsUsingDedicatedTutor": 1800,
+    "reverseQuestionsMisroutedAsMixed": 0,
+    "remainderDivisionValidated": true,
+    "negativeNumberInverseValidated": true,
+    "carryAndBorrowRegressionValidated": true,
+    "semanticQualityRepairs": {
+      "total": 55,
+      "sumDifferenceParity": 30,
+      "negativeInventory": 7,
+      "insufficientPayment": 2,
+      "selfReference": 16
+    },
+    "multiStepAnswerMisroutingFixed": true,
+    "reportedCaseExpectedSteps": [
+      "⚽＝3",
+      "🎈＝5×3＝15",
+      "🍎＝4×15＝60",
+      "60＋15＝75"
+    ]
+  },
   "errors": 0,
   "warnings": [],
   "validation": "通过",
-  "generatedAt": "2026-07-26T09:56:03.108Z"
+  "generatedAt": "2026-08-14T06:36:32.000Z"
 }
