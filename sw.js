@@ -1,4 +1,4 @@
-const CACHE="junjun-math-v12-build007-maximum-teaching-r1";
+const CACHE="junjun-math-v12-build009-stable-audit-r1";
 const CORE=[
   "./",
   "./index.html",
@@ -36,21 +36,28 @@ self.addEventListener("activate",event=>{
   );
 });
 
+async function networkFirst(request){
+  try{
+    const response=await fetch(request,{cache:"no-store"});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    const cache=await caches.open(CACHE);
+    await cache.put(request,response.clone());
+    return response;
+  }catch(error){
+    const cached=await caches.match(request,{ignoreSearch:true});
+    if(cached)return cached;
+    throw error;
+  }
+}
+
 self.addEventListener("fetch",event=>{
   if(event.request.method!=="GET")return;
   const url=new URL(event.request.url);
+  if(url.origin!==self.location.origin)return;
   const isRuntimeFile=/\/(?:index\.html|v12-[^/]+\.js|courses\.js|sw\.js)$/.test(url.pathname);
   if(isRuntimeFile){
-    event.respondWith(
-      fetch(event.request,{cache:"no-store"})
-        .then(response=>{
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put(event.request,copy));
-          return response;
-        })
-        .catch(()=>caches.match(event.request))
-    );
+    event.respondWith(networkFirst(event.request));
     return;
   }
-  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
+  event.respondWith(caches.match(event.request,{ignoreSearch:true}).then(cached=>cached||fetch(event.request)));
 });

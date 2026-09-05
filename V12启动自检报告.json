@@ -1,59 +1,121 @@
 {
-  "version": "V12长期版 · Build007 · 终极学习系统版 · 最高能力教学版",
-  "build": "Build007",
+  "version": "V12长期版 · Build009 · 最终稳定审计版",
+  "build": "Build009",
+  "baseBuild": "Build008",
+  "releaseType": "原主线增量升级",
   "courses": 26,
   "questionSets": 26,
-  "totalQuestions": 22456,
-  "gradeTotals": {
+  "rawQuestions": 22456,
+  "activeQuestions": 21509,
+  "exactDuplicatesRemovedFromActivePool": 947,
+  "rawGradeTotals": {
     "1": 10086,
     "2": 12370
   },
+  "activeGradeTotals": {
+    "1": 9633,
+    "2": 11876
+  },
   "uniquePrompts": 19589,
   "questionTemplates": 956,
-  "knowledgeMapCourses": 26,
-  "fillCapable": 21518,
-  "duplicateOptions": 0,
-  "invalidQuestions": 0,
-  "fourStageCourses": 26,
-  "diagnosticsVerified": 2,
-  "migrationVerified": true,
-  "offlineFiles": 21,
+  "courseSkills": 514,
+  "rawSourceKindLabels": 557,
+  "activeSourceKindLabels": 499,
+  "fillCapableActiveQuestions": 20627,
+  "catalogAudit": {
+    "activeQids": 21509,
+    "qidDuplicates": 0,
+    "qidHashCollisions": 0,
+    "invalidQuestions": 0,
+    "duplicateOptions": 0,
+    "negativeContextAnswers": 0,
+    "knownLanguageIssuesRemaining": 0,
+    "progressIdentityMismatches": 0
+  },
+  "semanticQualityRepairs": {
+    "repairedQuestions": 4744,
+    "repairCategoryHits": 4786,
+    "breakdown": {
+      "生活情境动词规范": 1725,
+      "分类属性语义修正": 200,
+      "负数库存情境修正": 7,
+      "分配对象语义修正": 400,
+      "量词与单位规范": 875,
+      "姓名一致性修正": 255,
+      "有效信息作答对齐": 200,
+      "容器与分组语义修正": 400,
+      "分组用途语义修正": 200,
+      "人物情境动词修正": 100,
+      "人物与角色量词修正": 200,
+      "和差关系奇偶修正": 28,
+      "物品量词修正": 116,
+      "人物关系指代修正": 14,
+      "作答要求与选项对齐": 29,
+      "抗干扰条件逻辑修正": 35,
+      "付款不足情境修正": 2
+    }
+  },
   "tutorValidation": {
-    "questionsGenerated": 22456,
+    "validatedActiveQuestions": 21509,
     "generationErrors": 0,
-    "validatedQuestions": 22456,
-    "sourceKindLabels": 557,
+    "invalidTutorLessons": 0,
     "methodProfiles": 43,
     "genericRoutes": 0,
-    "verifiedEquations": 16316,
-    "guidedCheckpoints": 909,
+    "verifiedEquations": 15919,
+    "guidedCheckpoints": 907,
     "hiddenSolutionLeaks": 0,
-    "adaptiveRecoveryValidated": true,
-    "progressIdentityPreserved": true,
-    "feedbackUsesValidatedTutor": true,
     "symbolQuestions": 1800,
     "symbolQuestionsUsingDedicatedTutor": 1800,
-    "reverseQuestionsMisroutedAsMixed": 0,
-    "remainderDivisionValidated": true,
-    "negativeNumberInverseValidated": true,
-    "carryAndBorrowRegressionValidated": true,
-    "semanticQualityRepairs": {
-      "total": 55,
-      "sumDifferenceParity": 30,
-      "negativeInventory": 7,
-      "insufficientPayment": 2,
-      "selfReference": 16
-    },
-    "multiStepAnswerMisroutingFixed": true,
-    "reportedCaseExpectedSteps": [
-      "⚽＝3",
-      "🎈＝5×3＝15",
-      "🍎＝4×15＝60",
-      "60＋15＝75"
-    ]
+    "reverseQuestionsMisroutedAsMixed": 0
+  },
+  "arithmeticValidation": {
+    "directArithmeticQuestionsChecked": 641,
+    "directArithmeticErrors": 0,
+    "ambiguousResultChoices": 0
+  },
+  "answerValidation": {
+    "rawMultiplicationExpressionQuestions": 29,
+    "activeMultiplicationExpressionQuestions": 25,
+    "fourTimesEightEqualsThirtyTwo": true,
+    "eightTimesFourAccepted": true,
+    "completeEquationAccepted": true,
+    "statedProductValidated": true,
+    "differentFactorsRejected": true,
+    "contextualOrderProtected": true,
+    "subtractionAndDivisionOrderProtected": true
+  },
+  "sessionValidation": {
+    "fourStageCourses": 26,
+    "adaptiveCourses": 26,
+    "randomCourses": 26,
+    "diagnosticsVerified": 2
+  },
+  "recordCompatibility": {
+    "schema": 12,
+    "storageKey": "junjun_math_v12",
+    "build008CurrentRecordPreserved": true,
+    "v11MigrationVerified": true,
+    "starsMistakesReviewsProgressSettingsAchievementsPreserved": true
+  },
+  "offlineValidation": {
+    "coreFiles": 21,
+    "missingFiles": 0,
+    "versionQueryFallback": true,
+    "runtimeFallbackVerified": true
+  },
+  "build008AssetsPreserved": {
+    "courseCatalog": true,
+    "questionBankFiles": 5,
+    "skillMap": true,
+    "store": true,
+    "tutor": true,
+    "styleAndHomepageStructure": true,
+    "mandarinPolicy": true,
+    "audioFiles": 4,
+    "icon": true
   },
   "errors": 0,
   "warnings": [],
   "validation": "通过",
-  "generatedAt": "2026-08-14T06:36:32.000Z"
+  "generatedAt": "2026-09-05T02:12:04Z"
 }

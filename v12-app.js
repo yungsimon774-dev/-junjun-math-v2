@@ -1,6 +1,6 @@
-import {V12Store,today} from "./v12-store.js";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120070";
+import {V12Store,today} from "./v12-store.js?v=120090";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120090";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120090";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -157,7 +157,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`V12外接题库实时核对：${stats.courses}个课程 · ${stats.questions.toLocaleString()}题 · ${stats.skills}个知识点 · ${stats.templates}种题目结构 · ${stats.fillable.toLocaleString()}题可防猜作答 · ${stats.semanticRepairs}处旧题语义已自动修正`;
+  $("#bankSummary").textContent=`Build009题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -408,7 +408,10 @@ function renderAnswerArea(){
   }else if(currentDescriptor.type==="relation"){
     $("#answerArea").innerHTML='<div class="fill-wrap"><div class="fill-label">自己选择应填写的数学符号</div><div class="relation-pad"><button data-relation=">">&gt;</button><button data-relation="=">=</button><button data-relation="<">&lt;</button></div></div>';
   }else if(currentDescriptor.type==="expression"){
-    $("#answerArea").innerHTML=`<div class="fill-wrap"><div class="fill-label">请自己写出算式</div><div id="answerDisplay" class="answer-display">＿</div>${expressionPad()}</div>`;
+    const label=currentDescriptor.comparison==="multiplication-factors"
+      ?"请写出乘法算式（交换两个因数也算正确）"
+      :"请自己写出算式";
+    $("#answerArea").innerHTML=`<div class="fill-wrap"><div class="fill-label">${label}</div><div id="answerDisplay" class="answer-display">＿</div>${expressionPad()}</div>`;
   }else{
     $("#answerArea").innerHTML=`<div class="fill-wrap"><div class="fill-label">请自己算出答案，不能靠选项猜</div><div id="answerDisplay" class="answer-display">＿${currentDescriptor.unit?`<small>${escapeHTML(currentDescriptor.unit)}</small>`:""}</div>${numericPad()}</div>`;
   }
@@ -772,14 +775,22 @@ function bindEvents(){
 
 function runtimeSelfTest(){
   const stats=engine.bankStats();
+  const audit=engine.catalogAudit();
   const problems=[];
   if(!window.MATH_V12_CONFIG)problems.push("V12配置未加载");
   if(!window.MATH_COURSES)problems.push("课程未加载");
   if(!window.MATH_QUESTIONS)problems.push("外接题库未加载");
   if(!window.MATH_V12_SKILL_MAP)problems.push("知识图谱未加载");
   if(stats.courses!==26)problems.push(`课程数异常：${stats.courses}`);
-  if(stats.questions!==22456)problems.push(`题目数异常：${stats.questions}`);
-  if(stats.semanticRepairs!==55)problems.push(`旧题语义修正数异常：${stats.semanticRepairs}`);
+  if(stats.rawQuestions!==22456)problems.push(`原题数异常：${stats.rawQuestions}`);
+  if(stats.questions!==21509)problems.push(`有效题数异常：${stats.questions}`);
+  if(stats.exactDuplicatesRemoved!==947)problems.push(`完全重复题审计异常：${stats.exactDuplicatesRemoved}`);
+  if(stats.fillable!==20627)problems.push(`防猜作答题数异常：${stats.fillable}`);
+  if(stats.repairedQuestions!==4744||stats.semanticRepairs!==4786)problems.push(`旧题语义修正数异常：${stats.repairedQuestions}/${stats.semanticRepairs}`);
+  if(!audit.qidsUnique||audit.qidCount!==21509)problems.push("有效题编号不唯一");
+  if(audit.invalidQuestions||audit.duplicateOptions||audit.negativeAnswers||audit.languageIssues)problems.push("题库质量审计未通过");
+  if(audit.qidCollisionsResolved)problems.push(`发现题号哈希冲突：${audit.qidCollisionsResolved}`);
+  if(audit.multiplicationExpressionQuestions!==25)problems.push(`乘法交换律题数异常：${audit.multiplicationExpressionQuestions}`);
   const intro=engine.getQuestion((engine.byCourse.get("g2u11")||[])[0]?.qid);
   if(intro?.prompt!=="🍎＝3，🍐＝3个🍎。🍐等于多少？")problems.push("等量代换首页题未锁定");
   if(intro&&buildTutor(intro,{stage:"teach"}).methodId!=="symbol-substitution")problems.push("等量代换教学流程异常");
@@ -790,6 +801,25 @@ function runtimeSelfTest(){
   const dedicatedSamples=[/最接近哪个整十数/,/里面有几个十和几个一/,/余数是多少/,/从1连续加到/]
     .map(pattern=>engine.catalog.find(question=>pattern.test(question.prompt))).filter(Boolean);
   if(dedicatedSamples.some(question=>buildTutor(question,{stage:"teach"}).methodId==="concept"))problems.push("专属教学流程抽检异常");
+  const multiplicationResult=engine.catalog.find(question=>question.prompt==="哪个算式的得数是48？"&&question.options[question.answer]==="8×6");
+  if(!multiplicationResult)problems.push("乘法交换律测试题缺失");
+  else{
+    const descriptor=answerDescriptor(multiplicationResult);
+    if(!compareAnswer(descriptor,{value:"6×8"})
+      ||!compareAnswer(descriptor,{value:"6×8=48"})
+      ||compareAnswer(descriptor,{value:"6×8=47"})
+      ||compareAnswer(descriptor,{value:"12×4"}))problems.push("乘法交换律判题异常");
+  }
+  const requestedCase=answerDescriptor({prompt:"哪个算式的得数是32？",options:["4×8"],answer:0});
+  if(!compareAnswer(requestedCase,{value:"8×4"})
+    ||!compareAnswer(requestedCase,{value:"8×4=32"})
+    ||compareAnswer(requestedCase,{value:"8×4=31"})
+    ||compareAnswer(requestedCase,{value:"2×16"}))problems.push("4×8与8×4回归测试异常");
+  const contextualDescriptor=answerDescriptor({prompt:"4行，每行8个，应列哪个算式？",options:["4×8"],answer:0});
+  if(compareAnswer(contextualDescriptor,{value:"8×4"}))problems.push("情境列式顺序保护异常");
+  const subtractionDescriptor=answerDescriptor({prompt:"哪个算式的得数是4？",options:["8-4"],answer:0});
+  const divisionDescriptor=answerDescriptor({prompt:"哪个算式的得数是2？",options:["8÷4"],answer:0});
+  if(compareAnswer(subtractionDescriptor,{value:"4-8"})||compareAnswer(divisionDescriptor,{value:"4÷8"}))problems.push("非交换运算顺序保护异常");
   return problems;
 }
 

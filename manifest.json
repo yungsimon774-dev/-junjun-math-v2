@@ -1,12 +1,12 @@
 {
-  "name": "峻峻数学大冒险 V12 Build007 终极学习系统版 最高能力教学版",
+  "name": "峻峻数学大冒险 V12 Build009 最终稳定审计版",
   "short_name": "峻峻数学 V12",
-  "start_url": "./index.html?v=120070",
+  "start_url": "./index.html?v=120090",
   "scope": "./",
   "display": "standalone",
   "background_color": "#8fdcff",
   "theme_color": "#2468e8",
-  "description": "四阶段教学、43类专属解题、个性化纠错、自适应诊断、间隔复习与长期外接题库",
+  "description": "四阶段教学、全题库质量审计、情境感知判题、个性化纠错、自适应诊断、间隔复习与长期外接题库",
   "icons": [
     {
       "src": "icon.svg",
