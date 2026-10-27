@@ -1,4 +1,4 @@
-const CACHE="junjun-math-v12-build009-stable-audit-r1";
+const CACHE="junjun-math-v12-build010-explore-r1";
 const CORE=[
   "./",
   "./index.html",
@@ -15,6 +15,8 @@ const CORE=[
   "./v12-engine.js",
   "./v12-tutor.js",
   "./v12-app.js",
+  "./v12-progress.js",
+  "./v12-explore.js",
   "./manifest.json",
   "./icon.svg",
   "./click.wav",

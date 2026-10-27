@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#2468e8">
   <title>峻峻数学大冒险 V12</title>
-  <link rel="manifest" href="./manifest.json?v=120090">
-  <link rel="stylesheet" href="./v12-style.css?v=120090">
+  <link rel="manifest" href="./manifest.json?v=120100">
+  <link rel="stylesheet" href="./v12-style.css?v=120100">
 </head>
 <body>
   <div class="sky" aria-hidden="true">
@@ -28,7 +28,7 @@
       <div class="brand">
         <small>峻峻</small>
         <h1>数学大冒险</h1>
-        <span id="version">V12长期版 · Build009 · 最终稳定审计版</span>
+        <span id="version">V12长期版 · Build010 · 探索与精准教学版</span>
       </div>
       <div class="hero-actions">
         <button id="voiceTest" aria-label="试听普通话">🔊<span>普通话</span></button>
@@ -61,6 +61,12 @@
           <p id="smartPlanText">根据薄弱知识点、到期复习和新课程自动安排。</p>
         </div>
         <button id="smartStart">开始今天的学习</button>
+      </article>
+
+      <article class="explore-card">
+        <div><small>🍎 等量代换 · 峻峻的思维时间</small><h2>数学探索工坊</h2><p>一层代换 → 连续代换 → 反推。换种解法，也可以自己出题。</p></div>
+        <div class="explore-actions"><button id="exploreStart">开始探索</button><button id="symbolStart">等量代换完整课程</button></div>
+        <small>不限时 · 不计入考试正确率 · 想法可以说给家长听</small>
       </article>
 
       <article id="diagnosticCard" class="diagnostic-card">
@@ -169,9 +175,11 @@
         <div id="masteryList" class="mastery-list"></div>
       </article>
       <article class="report-card">
-        <h3>主要错因</h3>
+        <h3>系统推测的错因（待核实）</h3>
         <div id="errorReasons" class="error-reasons"></div>
       </article>
+      <article class="report-card"><h3>孩子自述与陪学建议</h3><p id="independentNote"></p><div id="parentAdvice"></div></article>
+      <article class="report-card"><h3>探索与表达记录</h3><div id="explorationReport"></div></article>
       <article class="report-card">
         <h3>最近错题与复习安排</h3>
         <div id="mistakeList" class="mistake-list"></div>
@@ -196,15 +204,15 @@
     </section>
   </div>
 
-  <script src="./v12-config.js?v=120090"></script>
-  <script src="./courses.js?v=120090"></script>
-  <script src="./v12-bank-foundation.js?v=120090"></script>
-  <script src="./v12-bank-application.js?v=120090"></script>
-  <script src="./v12-bank-visual.js?v=120090"></script>
-  <script src="./v12-bank-symbol.js?v=120090"></script>
-  <script src="./v12-bank-life.js?v=120090"></script>
-  <script src="./v12-skill-map.js?v=120090"></script>
-  <script type="module" src="./v12-app.js?v=120090"></script>
-  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js?v=120090").catch(()=>{})}</script>
+  <script src="./v12-config.js?v=120100"></script>
+  <script src="./courses.js?v=120100"></script>
+  <script src="./v12-bank-foundation.js?v=120100"></script>
+  <script src="./v12-bank-application.js?v=120100"></script>
+  <script src="./v12-bank-visual.js?v=120100"></script>
+  <script src="./v12-bank-symbol.js?v=120100"></script>
+  <script src="./v12-bank-life.js?v=120100"></script>
+  <script src="./v12-skill-map.js?v=120100"></script>
+  <script type="module" src="./v12-app.js?v=120100"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js?v=120100").catch(()=>{})}</script>
 </body>
 </html>

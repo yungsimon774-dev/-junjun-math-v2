@@ -34,6 +34,7 @@ const DEFAULT_STATE={
   mistakes:[],
   reviews:{},
   sessions:[],
+  explorations:[],
   diagnostic:{completed:false,grade:2,date:0,score:0,skills:{}}
 };
 
@@ -55,6 +56,7 @@ function normalizeState(input={}){
   state.mistakes=Array.isArray(input.mistakes)?input.mistakes:[];
   state.reviews=input.reviews&&typeof input.reviews==="object"?input.reviews:{};
   state.sessions=Array.isArray(input.sessions)?input.sessions:[];
+  state.explorations=Array.isArray(input.explorations)?input.explorations.filter(row=>row&&typeof row==="object"&&!Array.isArray(row)).slice(0,40):[];
   state.rewards.claimedAchievements=Array.isArray(state.rewards.claimedAchievements)?state.rewards.claimedAchievements:[];
   state.settings.roundSize=[8,12,16,20].includes(Number(state.settings.roundSize))?Number(state.settings.roundSize):12;
   state.settings.practiceMode=["learning","adaptive","review","random"].includes(state.settings.practiceMode)?state.settings.practiceMode:"learning";

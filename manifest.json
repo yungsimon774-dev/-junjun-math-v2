@@ -1,7 +1,7 @@
 {
   "name": "峻峻数学大冒险 V12 Build009 最终稳定审计版",
   "short_name": "峻峻数学 V12",
-  "start_url": "./index.html?v=120090",
+  "start_url": "./index.html?v=120100",
   "scope": "./",
   "display": "standalone",
   "background_color": "#8fdcff",

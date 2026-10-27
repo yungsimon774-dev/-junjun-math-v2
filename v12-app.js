@@ -1,6 +1,9 @@
-import {V12Store,today} from "./v12-store.js?v=120090";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120090";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120090";
+import {V12Store,today} from "./v12-store.js?v=120100";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120100";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120100";
+
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120100";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120100";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -145,19 +148,21 @@ function renderHome(){
   $("#courseGrid").innerHTML=gradeCourses.map(course=>{
     const status=engine.courseStatus(course.id);
     const map=window.MATH_V12_SKILL_MAP?.[course.id]||{};
+    const route=engine.learningRoute(course.id);
     const locked=!status.ready;
     const levelClass=status.level==="已掌握"?"mastered":"";
     return `<button class="course-card ${locked?"locked":""}" data-course="${course.id}">
       <div class="course-top"><span class="course-icon">${course.icon}</span><span class="course-level ${levelClass}">${locked?"建议先学前置课":status.level}</span></div>
       <h3>${escapeHTML(course.title)}</h3>
       <p>${escapeHTML(map.goal||course.desc)}</p>
+      ${route.secure?`<small class="route-note">${route.secure}/${route.skills}个题型近期独立掌握，减少重复练习</small>`:""}
       <div class="mastery-line"><span>掌握 ${status.score}%</span><div class="mastery-track"><i style="width:${status.score}%"></i></div></div>
       <div class="course-go"><span>${escapeHTML(map.domain||"综合数学")}</span><b>${status.level==="未开始"?"开始学习":"继续学习"} →</b></div>
     </button>`;
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build009题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build010题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -200,12 +205,12 @@ function renderPlan(){
 function renderReport(){
   const state=store.state;
   const accuracy=state.stats.attempts?Math.round(state.stats.firstCorrect/state.stats.attempts*100):0;
-  const independent=state.stats.attempts?Math.max(0,Math.round((1-state.stats.hints/Math.max(1,state.stats.attempts))*100)):0;
+  const independent=independentSummary(state);
   $("#reportStats").innerHTML=[
     ["答题",state.stats.attempts],
     ["首次正确",state.stats.attempts?accuracy+"%":"—"],
     ["自主纠错",state.stats.recovered],
-    ["独立完成",state.stats.attempts?independent+"%":"—"],
+    ["无提示独立答对",independent.rate===null?"—":independent.rate+"%"],
     ["总体掌握",state.stats.attempts?engine.overallMastery()+"%":"—"],
     ["待复习",engine.dueReviews().length],
     ["学习场次",state.stats.completedSessions],
@@ -218,11 +223,16 @@ function renderReport(){
 
   const weak=engine.weakSkills(12);
   $("#masteryList").innerHTML=weak.length?weak.map(item=>`<div class="mastery-row"><b>${escapeHTML(item.name)}</b><div class="mastery-bar"><i style="width:${item.score}%"></i></div><span>${item.score}%</span></div>`).join(""):"完成诊断和练习后，这里会按知识点显示真正的掌握程度。";
+  $("#independentNote").textContent=`独立指标从Build010起记录：${independent.correct}/${independent.total}题无提示首次答对；讲解、引导题不计入。旧版记录继续保留。`;
+  const reflections=reflectionSummary(state);
+  $("#parentAdvice").innerHTML=reflections.length?reflections.map(row=>`<div class="parent-advice"><b>${escapeHTML(row.label)} · ${row.count}次</b><p>${escapeHTML(row.advice)}</p></div>`).join(""):"答错后可请峻峻自选卡点；这里会据此给出陪学建议，不把系统猜测当作事实。";
+  const creations=state.explorations||[];
+  $("#explorationReport").innerHTML=creations.length?creations.slice(0,5).map(row=>`<div class="parent-advice"><b>${escapeHTML(row.title)} · ${row.correct?"已解出":"继续探索"}</b><p>${escapeHTML(row.prompt)}</p><small>峻峻的想法：${escapeHTML(row.note||"未记录口述或文字想法")}</small></div>`).join(""):"还没有探索记录。可以从首页的数学探索工坊开始，不限时、不计正确率。";
   const reasons=engine.errorReasons();
   $("#errorReasons").innerHTML=reasons.length?reasons.slice(0,10).map(item=>`<span class="error-chip">${escapeHTML(item.reason)}<b>${item.count}</b></span>`).join(""):"暂时没有可分析的错因。";
   $("#mistakeList").innerHTML=state.mistakes.length?state.mistakes.slice(0,12).map(item=>{
     const review=state.reviews[item.qid];
-    return `<div class="mistake-item"><b>${escapeHTML(item.course)}</b><span>${escapeHTML(item.reason||"待分析")}</span><p>${escapeHTML(item.prompt||item.q)}</p><small>正确答案：${escapeHTML(item.correct||item.a)} · ${review?`复习日 ${review.dueDate}`:"已加入复习"}</small></div>`;
+    return `<div class="mistake-item"><b>${escapeHTML(item.course)}</b><span>系统推测：${escapeHTML(item.reason||"待分析")}${item.reflection?` · 孩子自述：${escapeHTML(REFLECTIONS[item.reflection]?.label||"")}`:""}</span><p>${escapeHTML(item.prompt||item.q)}</p><small>正确答案：${escapeHTML(item.correct||item.a)} · ${review?`复习日 ${review.dueDate}`:"已加入复习"}</small></div>`;
   }).join(""):"🎉 暂时没有错题。";
 }
 
@@ -305,7 +315,7 @@ function showItem(){
   activePart=0;
   currentDescriptor=answerDescriptor(q);
   currentMode=chooseAnswerMode(item);
-  $("#sessionType").textContent=session.type==="learning"?"四阶段学习":session.type==="diagnostic"?"能力诊断":session.type==="review"?"间隔复习":session.type==="random"?"随机练习":"智能强化";
+  $("#sessionType").textContent=session.type==="learning"?(session.route?.compact?"已掌握，直接迁移挑战":"四阶段学习"):session.type==="diagnostic"?"能力诊断":session.type==="review"?"间隔复习":session.type==="random"?"随机练习":"智能强化";
   $("#gameTitle").textContent=`${session.course.icon} ${session.course.title}`;
   $("#questionCount").textContent=`${itemIndex+1}/${session.items.length}`;
   $("#gameProgress").style.width=itemIndex/session.items.length*100+"%";
@@ -350,7 +360,9 @@ function renderCheckpoint(checkpoint){
   $("#checkpointCheck").disabled=false;
   $("#checkpointFeedback").textContent="";
   $("#checkpointCheck").onclick=()=>{
-    if(Number($("#checkpointInput").value)===checkpoint.answer){
+    const value=$("#checkpointInput").value.trim();
+    if(!value){$("#checkpointFeedback").textContent="请先填写第一步的答案。";return}
+    if(Number(value)===checkpoint.answer){
       checkpointPassed=true;
       $("#checkpointFeedback").textContent="✅ 第一步正确，再完成最后的问题。";
       $("#checkpointInput").disabled=true;
@@ -386,6 +398,10 @@ function showTutor(reveal=false){
   const mistakeReason=mistakeEntry?engine.classifyError(item.question,mistakeEntry):"";
   const lesson=buildTutor(item.question,{stage:item.stage,reveal,hintLevel,mistakeEntry,mistakeReason});
   renderTutor(lesson,reveal?"完整讲解与答案":lesson.recoveryApplied?"针对刚才答案的纠错提示":"只显示方法，不直接公布答案");
+  if(retrying&&!reveal&&$("#checkpointCard").classList.contains("hidden")){
+    const guided=buildTutor(item.question,{stage:"guided",reveal:false,hintLevel:0});
+    if(guided.checkpoint)renderCheckpoint(guided.checkpoint);
+  }
   $("#tutorPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -532,14 +548,13 @@ function finalizeAnswer({firstCorrect,recovered,entry}){
   retrying=false;
   const item=session.items[itemIndex];
   const q=item.question;
-  const masteredMistake=session.type==="review"&&(firstCorrect||recovered)?store.state.mistakes.find(mistake=>mistake.skillId===q.skillId)?.qid:null;
   const result={
     firstCorrect,
     recovered,
     elapsedMs:Date.now()-questionStartedAt,
     hints,
     entry,
-    masteredMistake
+    firstWrongEntry
   };
   const updated=engine.recordResult(item,result);
   sessionResults.push({skillId:q.skillId,firstCorrect,recovered,stage:item.stage,qid:q.qid});
@@ -552,13 +567,29 @@ function finalizeAnswer({firstCorrect,recovered,entry}){
     $("#feedback").innerHTML=`🛠️ 自己改对了！首次错误仍会保留在统计里，但已记录“自主纠错”。${feedbackTutorHTML(q)}`;
     play("correct");celebrate(8);speak("自己改对了，这才是真正的进步");
   }else{
-    $("#feedback").innerHTML=`💡 正确答案：<b>${escapeHTML(q.options[q.answer])}</b><br>错因初步判断：<b>${escapeHTML(engine.classifyError(q,entry))}</b>${feedbackTutorHTML(q)}`;
+    $("#feedback").innerHTML=`💡 正确答案：<b>${escapeHTML(q.options[q.answer])}</b><br>系统推测（待核实）：<b>${escapeHTML(engine.classifyError(q,firstWrongEntry||entry))}</b>${feedbackTutorHTML(q)}`;
     hintLevel=10;
     showTutor(true);
     play("wrong");speak("这题先弄明白，系统会安排同类题复习");
   }
+  if(!firstCorrect)renderReflection(q);
   $("#nextQuestion").classList.remove("hidden");
   header();
+}
+
+function renderReflection(q){
+  $("#feedback").insertAdjacentHTML("beforeend",`<div class="reflection-box"><b>刚才卡在哪里？（可以跳过）</b><div class="reflection-options">${Object.entries(REFLECTIONS).map(([id,row])=>`<button data-reflection="${id}">${escapeHTML(row.label)}</button>`).join("")}</div><small id="reflectionSaved" role="status">系统推测只供参考，你的想法更重要。</small></div>`);
+  $$("[data-reflection]").forEach(button=>button.onclick=()=>{
+    const id=button.dataset.reflection;
+    const stats=store.state.questionStats[q.qid];
+    stats.reflections=stats.reflections||{};
+    stats.reflections[id]=Number(stats.reflections[id]||0)+1;
+    const mistake=store.state.mistakes.find(row=>row.qid===q.qid);
+    if(mistake)mistake.reflection=id;
+    store.save();
+    $$("[data-reflection]").forEach(b=>{b.disabled=true;b.classList.toggle("active",b===button)});
+    $("#reflectionSaved").textContent="已记下，家长报告会参考你的想法。";
+  });
 }
 
 function nextItem(){
@@ -665,6 +696,54 @@ function showAchievements(){
   openModal("🏆","我的成就",`<div class="achievement-list">${items.map(([icon,name,desc,done])=>`<div class="achievement ${done?"done":""}"><span>${done?icon:"🔒"}</span><div><b>${name}</b><small>${desc}</small></div><em>${done?"已解锁":"未解锁"}</em></div>`).join("")}</div>`);
 }
 
+function showExploration(level=1,values){
+  const puzzle=createExploration(level,values);
+  let correct=false;
+  let hintUsed=false;
+  openModal("🔭","数学探索工坊",`<div class="exploration">
+    <p>不计时、不计入正确率。可以画图、摆实物，或把想法说给家长听。</p>
+    <div class="segments explore-levels">${[1,2,3].map(n=>`<button data-explore-level="${n}" class="${n===puzzle.level?"active":""}">${n} · ${["","一层","连续","反推"][n]}</button>`).join("")}</div>
+    <h3>${escapeHTML(puzzle.title)}</h3><p class="explore-prompt">${escapeHTML(puzzle.prompt)}</p>
+    <div class="explore-answer"><label for="exploreAnswer">我的答案</label><input id="exploreAnswer" inputmode="numeric" autocomplete="off"><button id="exploreCheck">试试看</button></div>
+    <p id="exploreFeedback" role="status">先想一想：哪个量是已知的？</p>
+    <button id="exploreHint">给我第一步提示</button>
+    <div id="exploreStep" class="hidden"><p>${escapeHTML(puzzle.firstPrompt)}</p><label for="exploreFirst">第一步答案</label><input id="exploreFirst" inputmode="numeric"><button id="exploreFirstCheck">检查第一步</button><p id="exploreFirstFeedback" role="status"></p></div>
+    <div id="exploreMethods" class="hidden"></div>
+    <label class="explore-note" for="exploreNote">我的想法 / 我出的新问题（也可由家长代记）</label><textarea id="exploreNote" rows="3" maxlength="500" placeholder="我是这样想的……还有别的解法吗？"></textarea>
+    <div class="explore-actions"><button id="exploreSave">保存探索记录</button><button id="exploreNext">换一道</button></div><p id="exploreSaved" role="status"></p>
+    <details><summary>我来出一道题</summary><p>试着改一改数字，看看答案怎样变化。生成新题前，记得先保存当前想法。</p><div class="creator-fields"><label>一个🍎的数值（1～9）<input id="createA" type="number" min="1" max="9" value="${puzzle.a}"></label><label>🍐有几个🍎（2～5）<input id="createB" type="number" min="2" max="5" value="${puzzle.b}"></label>${puzzle.level===3?`<label>🍇比🍐多多少（1～9）<input id="createC" type="number" min="1" max="9" value="${puzzle.c}"></label>`:""}</div><button id="createPuzzle">生成我的题目</button><p id="createFeedback" role="status"></p></details>
+  </div>`);
+  const save=()=>{
+    const row={id:puzzle.id,title:puzzle.title,prompt:puzzle.prompt,level:puzzle.level,correct,hintUsed,note:$("#exploreNote").value.trim().slice(0,500),date:Date.now()};
+    store.state.explorations=[row,...(store.state.explorations||[]).filter(item=>item.id!==puzzle.id)].slice(0,40);
+    store.save();
+    $("#exploreSaved").textContent="已保存，可在家长报告里查看。";
+  };
+  $("#exploreCheck").onclick=()=>{
+    if(!$("#exploreAnswer").value.trim()){$("#exploreFeedback").textContent="先填一个答案，再一起检查。";return}
+    correct=checkExploration($("#exploreAnswer").value,puzzle.answer);
+    $("#exploreFeedback").textContent=correct?"✅ 解出来了！看看两种方法，再说说你用了哪一种。":"还没对。先找已知量，再沿着关系换一层；可以点第一步提示。";
+    if(correct){
+      $("#exploreMethods").innerHTML=`<h4>两种解法，哪种更像你的想法？</h4>${puzzle.methods.map(method=>`<p>${escapeHTML(method)}</p>`).join("")}`;
+      $("#exploreMethods").classList.remove("hidden");
+      save();
+    }
+  };
+  $("#exploreHint").onclick=()=>{hintUsed=true;$("#exploreStep").classList.remove("hidden")};
+  $("#exploreFirstCheck").onclick=()=>{
+    const value=$("#exploreFirst").value;
+    $("#exploreFirstFeedback").textContent=!value.trim()?"请先填写第一步答案。":checkExploration(value,puzzle.firstAnswer)?`✅ 第一步对了：${puzzle.firstSolution}。再回到最后的问题。`:"试着画出相同的几组，或者把总数平均分。";
+  };
+  $("#exploreSave").onclick=save;
+  $("#exploreNext").onclick=()=>{save();showExploration(puzzle.level)};
+  $$("[data-explore-level]").forEach(button=>button.onclick=()=>{save();showExploration(Number(button.dataset.exploreLevel))});
+  $("#createPuzzle").onclick=()=>{
+    const a=Number($("#createA").value),b=Number($("#createB").value),c=puzzle.level===3?Number($("#createC").value):puzzle.c;
+    if(!Number.isInteger(a)||a<1||a>9||!Number.isInteger(b)||b<2||b>5||!Number.isInteger(c)||c<1||c>9){$("#createFeedback").textContent="请按标注范围填写整数。";return}
+    save();showExploration(puzzle.level,{a,b,c});
+  };
+}
+
 function showMathTools(){
   openModal("🧰","数学工具箱",`<div class="math-tools">
     <div class="tool-card"><b>🔢 数位分解</b><p>输入0～9999的整数</p><input id="placeValueInput" type="number" min="0" max="9999" value="2368" inputmode="numeric"><div id="placeValueResult" class="tool-result"></div></div>
@@ -746,6 +825,8 @@ function bindEvents(){
   };
   $("#rewardBtn").onclick=showReward;
   $("#toolsBtn").onclick=showMathTools;
+  $("#exploreStart").onclick=()=>showExploration(1);
+  $("#symbolStart").onclick=()=>showCourseChoice("g2u11");
   $("#settingsBtn").onclick=showSettings;
   $("#voiceTest").onclick=()=>speak("你好，我是普通话语音。峻峻，我们一起学习数学吧。");
   $("#modalClose").onclick=closeModal;
@@ -765,6 +846,7 @@ function bindEvents(){
   $("#recordFile").onchange=event=>importRecord(event.target.files?.[0]);
   $("#resetRecord").onclick=resetRecord;
   document.addEventListener("keydown",event=>{
+    if(event.target?.matches?.("input,textarea,select,[contenteditable=true]")||!$("#modal").classList.contains("hidden"))return;
     if(!session||finalized||currentMode!=="input"||!$("#game").classList.contains("active"))return;
     if(/^\d$/.test(event.key)){appendKey(event.key);event.preventDefault()}
     else if(["+","-","=","(",")"].includes(event.key)){appendKey(event.key);event.preventDefault()}

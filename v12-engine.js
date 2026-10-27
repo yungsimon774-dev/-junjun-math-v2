@@ -1,3 +1,5 @@
+import {hasSecureEvidence} from "./v12-progress.js?v=120100";
+
 const courses=Array.isArray(window.MATH_COURSES)?window.MATH_COURSES:[];
 const banks=window.MATH_QUESTIONS||{};
 const skillMap=window.MATH_V12_SKILL_MAP||{};
@@ -527,6 +529,18 @@ export class LearningEngine{
     return this.byQid.get(qid)||null;
   }
 
+  skillSecure(skillId){
+    return hasSecureEvidence(this.store.state.skillStats[skillId]);
+  }
+
+  learningRoute(courseId){
+    const questions=this.byCourse.get(courseId)||[];
+    const skills=[...new Set(questions.map(q=>q.skillId))];
+    const secure=skills.filter(id=>this.skillSecure(id));
+    const due=questions.some(q=>this.isDue(q.qid));
+    return {skills:skills.length,secure:secure.length,compact:Boolean(skills.length&&secure.length===skills.length&&!due)};
+  }
+
   skillMastery(skillId){
     return mastery(this.store.state.skillStats[skillId]);
   }
@@ -623,7 +637,8 @@ export class LearningEngine{
 
   pickForStage(courseId,stage,count,selected=[]){
     const all=this.byCourse.get(courseId)||[];
-    const sorted=all
+    const eligible=all.filter(q=>stage==="transfer"||!this.skillSecure(q.skillId)||this.isDue(q.qid));
+    const sorted=eligible
       .filter(q=>!selected.some(item=>item.qid===q.qid))
       .map(q=>({q,score:this.candidateScore(q,stage)}))
       .sort((a,b)=>b.score-a.score)
@@ -635,7 +650,8 @@ export class LearningEngine{
   buildLearningSession(courseId){
     const course=this.getCourse(courseId);
     if(!course)throw new Error("课程不存在");
-    const counts=this.stageCounts(this.store.state.settings.roundSize);
+    const route=this.learningRoute(courseId);
+    const counts=route.compact?{teach:0,guided:0,independent:0,transfer:4}:this.stageCounts(this.store.state.settings.roundSize);
     let selected=[];
     const items=[];
     for(const stage of ["teach","guided","independent","transfer"]){
@@ -648,7 +664,7 @@ export class LearningEngine{
         question
       }));
     }
-    return {id:`learning:${courseId}:${Date.now()}`,type:"learning",course,items,startedAt:Date.now()};
+    return {id:`learning:${courseId}:${Date.now()}`,type:"learning",course,items,route,startedAt:Date.now()};
   }
 
   buildAdaptiveSession(courseId){
@@ -660,7 +676,8 @@ export class LearningEngine{
       .map(q=>({q,score:this.candidateScore(q,"independent")+(this.isDue(q.qid)?45:0)}))
       .sort((a,b)=>b.score-a.score)
       .map(item=>item.q);
-    const questions=this.pickDiverse(sorted,count);
+    const dueOrWeak=sorted.filter(q=>!this.skillSecure(q.skillId)||this.isDue(q.qid));
+    const questions=this.pickDiverse(dueOrWeak.length?dueOrWeak:sorted,dueOrWeak.length?count:Math.min(4,count));
     return {
       id:`adaptive:${courseId}:${Date.now()}`,
       type:"adaptive",
@@ -728,12 +745,16 @@ export class LearningEngine{
   buildReviewSession(){
     const due=this.dueReviews();
     const questions=[];
+    const origins=new Map();
     for(const review of due){
       const original=this.byQid.get(review.qid);
       if(!original)continue;
       const variants=(this.bySkill.get(original.skillId)||[])
         .filter(q=>q.qid!==original.qid&&!questions.some(item=>item.qid===q.qid));
-      questions.push(shuffle(variants)[0]||original);
+      const chosen=shuffle(variants)[0]||original;
+      if(questions.some(q=>q.qid===chosen.qid))continue;
+      questions.push(chosen);
+      origins.set(chosen.qid,original.qid);
       if(questions.length>=this.store.state.settings.roundSize)break;
     }
     if(questions.length<this.store.state.settings.roundSize){
@@ -746,7 +767,7 @@ export class LearningEngine{
       id:`review:${Date.now()}`,
       type:"review",
       course:reviewCourse,
-      items:questions.map((question,index)=>({id:`review:${question.qid}:${index}`,stage:"review",example:false,question})),
+      items:questions.map((question,index)=>({id:`review:${question.qid}:${index}`,stage:"review",example:false,question,reviewOriginalQid:origins.get(question.qid)||null})),
       startedAt:Date.now()
     };
   }
@@ -863,6 +884,13 @@ export class LearningEngine{
       stats.hints=Number(stats.hints||stats.help||0)+Number(result.hints||0);
       stats.totalMs=Number(stats.totalMs||0)+elapsed;
     }
+    const independent=["independent","transfer","diagnostic","review"].includes(item.stage);
+    const evidence={qid:q.qid,at:Date.now(),stage:item.stage,independent,firstCorrect,hints:Number(result.hints||0)};
+    skillStats.recentEvidence=[...(skillStats.recentEvidence||[]),evidence].slice(-12);
+    if(independent){
+      state.stats.independentObserved=Number(state.stats.independentObserved||0)+1;
+      if(firstCorrect&&!result.hints)state.stats.independentCorrect=Number(state.stats.independentCorrect||0)+1;
+    }
     questionStats.wrong=Number(questionStats.wrong||0)+(wrong?1:0);
     questionStats.lastAt=Date.now();
     for(const stats of [courseStats,skillStats]){
@@ -884,7 +912,7 @@ export class LearningEngine{
     state.daily.totalMs=Number(state.daily.totalMs||0)+elapsed;
     state.daily.minutes=Math.round(state.daily.totalMs/60000);
     if(wrong){
-      const reason=this.classifyError(q,result.entry);
+      const reason=this.classifyError(q,result.firstWrongEntry||result.entry);
       courseStats.errorReasons=courseStats.errorReasons||{};
       skillStats.errorReasons=skillStats.errorReasons||{};
       courseStats.errorReasons[reason]=Number(courseStats.errorReasons[reason]||0)+1;
@@ -900,14 +928,23 @@ export class LearningEngine{
         skillId:q.skillId,
         template:q.template,
         reason,
+        reasonSource:"system",
+        firstEntry:result.firstWrongEntry||result.entry,
         explain:q.explain||"",
         wrongAt:Date.now()
       };
       state.mistakes=[mistake,...state.mistakes.filter(item=>item.qid!==q.qid)].slice(0,100);
     }
-    if(result.masteredMistake)state.mistakes=state.mistakes.filter(mistake=>mistake.qid!==result.masteredMistake);
-    const quality=firstCorrect?(Number(result.hints||0)?4:5):recovered?3:1;
+    const quality=firstCorrect?(Number(result.hints||0)||!independent?4:5):recovered?3:1;
     this.scheduleReview(q,quality);
+    if(item.reviewOriginalQid&&item.reviewOriginalQid!==q.qid){
+      const original=this.getQuestion(item.reviewOriginalQid);
+      if(original)this.scheduleReview(original,quality);
+    }
+    if(firstCorrect&&!result.hints&&independent){
+      const reviewed=item.reviewOriginalQid||q.qid;
+      state.mistakes=state.mistakes.filter(mistake=>mistake.qid!==reviewed);
+    }
     this.store.save();
     return {skillMastery:this.skillMastery(q.skillId),courseMastery:this.courseMastery(q.courseId),quality};
   }

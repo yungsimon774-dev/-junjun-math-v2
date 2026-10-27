@@ -1,0 +1,69 @@
+// Run with: node --experimental-vm-modules tests/dom.cjs
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const {JSDOM,VirtualConsole}=require('jsdom');
+const root=path.resolve(__dirname,'..');
+const errors=[];
+const virtualConsole=new VirtualConsole();
+virtualConsole.on('jsdomError',error=>errors.push(String(error)));
+const dom=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'https://example.test/math/',runScripts:'outside-only',pretendToBeVisual:true,virtualConsole});
+const w=dom.window;
+w.Audio=class {play(){return Promise.resolve()}currentTime=0};
+w.HTMLElement.prototype.scrollIntoView=function(){};
+w.alert=message=>{throw new Error(message)};
+w.localStorage.setItem('junjun_math_v12',JSON.stringify({schema:12,profile:{name:'峻峻',grade:2},stats:{stars:123,attempts:10,firstCorrect:8},settings:{sound:false,autoRead:false,answerMode:'choice',roundSize:8},mistakes:[],sessions:[]}));
+for(const name of ['v12-config','courses','v12-bank-foundation','v12-bank-application','v12-bank-visual','v12-bank-symbol','v12-bank-life','v12-skill-map'])w.eval(fs.readFileSync(path.join(root,`${name}.js`),'utf8'));
+const cache=new Map();
+async function load(name){
+  name=path.basename(name.split('?')[0]);
+  if(cache.has(name))return cache.get(name);
+  const module=new vm.SourceTextModule(fs.readFileSync(path.join(root,name),'utf8'),{context:dom.getInternalVMContext(),identifier:name});
+  cache.set(name,module);await module.link(specifier=>load(specifier));return module;
+}
+const el=selector=>w.document.querySelector(selector);
+const click=selector=>{assert.ok(el(selector),selector);el(selector).click();assert.deepEqual(errors,[])};
+const fill=(selector,value)=>{el(selector).value=value};
+(async()=>{
+  const app=await load('v12-app.js');await app.evaluate();
+  assert.equal(w.document.querySelectorAll('.course-card').length,14);
+  assert.equal(el('#loadError').classList.contains('hidden'),true);
+  assert.equal(el('#statStars').textContent,'123');
+  assert.match(el('#version').textContent,/Build010/);
+  click('#exploreStart');click('#exploreCheck');assert.match(el('#exploreFeedback').textContent,/先填/);
+  click('[data-explore-level="3"]');fill('#createA','3');fill('#createB','4');fill('#createC','2');click('#createPuzzle');
+  assert.match(el('.explore-prompt').textContent,/🍎＋🍎＝6/);
+  click('#exploreHint');click('#exploreFirstCheck');assert.match(el('#exploreFirstFeedback').textContent,/先填写/);
+  fill('#exploreFirst','3');click('#exploreFirstCheck');assert.match(el('#exploreFirstFeedback').textContent,/第一步对了/);
+  fill('#exploreAnswer','13');click('#exploreCheck');assert.match(el('#exploreFeedback').textContent,/还没对/);
+  fill('#exploreAnswer','14');click('#exploreCheck');assert.equal(el('#exploreMethods').classList.contains('hidden'),false);
+  fill('#exploreNote','我先平均分，再代换。<script>bad()</script>');click('#exploreSave');
+  const persisted=JSON.parse(w.localStorage.getItem('junjun_math_v12'));
+  assert.equal(persisted.explorations[0].correct,true);assert.equal(persisted.explorations[0].hintUsed,true);
+  assert.equal(persisted.stats.attempts,10);assert.equal(persisted.stats.stars,123);
+  click('#modalClose');click('[data-panel="report"]');assert.match(el('#explorationReport').textContent,/平均分/);assert.equal(el('#explorationReport script'),null);
+  assert.match(el('#independentNote').textContent,/0\/0/);
+  click('[data-panel="home"]');click('[data-course="g2u11"]');click('[data-course-mode="random"]');
+  const engineModule=cache.get('v12-engine.js');const tutorModule=cache.get('v12-tutor.js');
+  const engine=new engineModule.namespace.LearningEngine({state:JSON.parse(w.localStorage.getItem('junjun_math_v12'))});
+  const q=engine.catalog.find(q=>q.prompt===el('#questionText').textContent);assert.ok(q);
+  click(`[data-option="${(q.answer+1)%q.options.length}"]`);
+  if(!el('#checkpointCard').classList.contains('hidden')){
+    click('#checkpointCheck');assert.match(el('#checkpointFeedback').textContent,/先填写/);
+    const cp=tutorModule.namespace.buildTutor(q,{stage:'guided'}).checkpoint;
+    fill('#checkpointInput',String(cp.answer));click('#checkpointCheck');
+  }
+  click(`[data-option="${q.answer}"]`);click('[data-reflection="reading"]');
+  assert.match(el('#reflectionSaved').textContent,/已记下/);
+  click('[data-panel="report"]');assert.match(el('#parentAdvice').textContent,/已知什么/);assert.match(el('#mistakeList').textContent,/孩子自述/);
+  const result=JSON.parse(w.localStorage.getItem('junjun_math_v12'));
+  assert.equal(result.stats.recovered,1);assert.equal(result.mistakes[0].firstEntry.selectedIndex,(q.answer+1)%q.options.length);
+  // Input and textarea keys must not be intercepted by the game keyboard.
+  click('[data-panel="home"]');click('#exploreStart');
+  const key=new w.KeyboardEvent('keydown',{key:'1',bubbles:true,cancelable:true});el('#exploreAnswer').dispatchEvent(key);assert.equal(key.defaultPrevented,false);
+  fill('#createA','0');click('#createPuzzle');assert.match(el('#createFeedback').textContent,/范围/);
+  assert.deepEqual(errors,[]);
+  console.log(JSON.stringify({result:'PASS',tests:['Build010 startup and catalog self-test','Build009 preservation','empty/incorrect/correct exploration answers','three-level creation','step hints','two methods','notes and HTML escaping','record persistence','correction checkpoint','first wrong answer retention','reflection report','keyboard focus','invalid custom values'],visualRendering:'not tested by jsdom'},null,2));
+  w.close();
+})().catch(error=>{w.close();console.error(error);process.exit(1)});
