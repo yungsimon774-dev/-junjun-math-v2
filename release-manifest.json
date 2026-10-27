@@ -1,0 +1,113 @@
+{
+  "release": "120130",
+  "files": [
+    {
+      "path": "click.wav",
+      "sha256": "6317b3d59b4f00df814708cbe3b7a7405fce7d846d2ca0ef6f636f986bf91961"
+    },
+    {
+      "path": "correct.wav",
+      "sha256": "0f5885d228b000426c7d3bd05067454ab8a489b62147eac25be939589fb989c6"
+    },
+    {
+      "path": "courses.js",
+      "sha256": "72edcdc98364d14ac7572fa858f8055284a2aecac0709808ba610980e69c7fe9"
+    },
+    {
+      "path": "finish.wav",
+      "sha256": "fa75bbe64e51da1b6cdad28855d1a7c3e4651bd1a16c58f215f723e607fe846b"
+    },
+    {
+      "path": "icon.svg",
+      "sha256": "d25d5609c580561cd11cc813c212983269315c7d99a96fad6fbbf91f955db507"
+    },
+    {
+      "path": "index.html",
+      "sha256": "83327296b141eecdc515843b2de6b73b41b4f78ef5f471511220a711f95a2d06"
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "db6318075f3014937b578c03610e95a2367d968bc2d9c33d381d0908b47245ec"
+    },
+    {
+      "path": "v12-app.js",
+      "sha256": "85e4f6d338829b25e6f7d765e4a6a824d8b19f4b77f2025ffda49899c5d62225"
+    },
+    {
+      "path": "v12-bank-application.js",
+      "sha256": "0d49ab2da4a60ea9bb9d1183665c4efa4a17feeacc2c546af4ed696041f65719"
+    },
+    {
+      "path": "v12-bank-foundation.js",
+      "sha256": "a96857532fdd6e4af13f9ce70f5d70c708fe8eef5c452845e17990666c105367"
+    },
+    {
+      "path": "v12-bank-life.js",
+      "sha256": "076a53d4132503e77922519f3ea67da95e34387312d0d97f94b7616f396c714e"
+    },
+    {
+      "path": "v12-bank-symbol.js",
+      "sha256": "7a46d779ae8a3d6874dee2cd9445893e8065d49d1756008bce8fbb0a4da039b2"
+    },
+    {
+      "path": "v12-bank-visual.js",
+      "sha256": "63e355a6a6144b8179908d479b09ae8851d1f7944625206c3b39550db6fe69af"
+    },
+    {
+      "path": "v12-config.js",
+      "sha256": "88817619554f6cda469aa985139b9c2dbcf6e105d9a16fdbf8bb25b973c51272"
+    },
+    {
+      "path": "v12-engine.js",
+      "sha256": "48b8cc822cde4da4d3a10096d17c200261e82c521d7cbb71a3c516ee2fcd93b3"
+    },
+    {
+      "path": "v12-explore.js",
+      "sha256": "ee916aa7a9518568ef5242387de99afea5d7c009651bceb67382938e2f0d3624"
+    },
+    {
+      "path": "v12-lab-view.js",
+      "sha256": "86e8263865ad8b848bace446cf0a87211f9b34d8f07fc65b60a37d97b30905eb"
+    },
+    {
+      "path": "v12-lab.js",
+      "sha256": "31f5de1b212f2d6df20c8d11a0228a147b411e3a7dd36faebb81172c57d8748c"
+    },
+    {
+      "path": "v12-offline.js",
+      "sha256": "3d5eb90a00528bacd9df5038624b9e018e889f2619e3b553f41b2accaca2d9b9"
+    },
+    {
+      "path": "v12-open.js",
+      "sha256": "9824d670ebae8a9e149e5d36cdce7a752a6f245c395478a44b143f7ea792fd42"
+    },
+    {
+      "path": "v12-progress.js",
+      "sha256": "a16961ba9869b1aaff908074fa94f2c3b0cf499a7bbafb977f3450c1fdb1bdf6"
+    },
+    {
+      "path": "v12-skill-map.js",
+      "sha256": "3218c15721730c00cbed8d77b378546fc78897178cb8d2d3c234e9b9c5212cec"
+    },
+    {
+      "path": "v12-store.js",
+      "sha256": "aa93745a84e0124e17e8f03d5d6817772a3cb25b32c3563375bb84b436e80f33"
+    },
+    {
+      "path": "v12-style.css",
+      "sha256": "8b8bb781533b5bb75d81e72f5160a65ba608af50fa7561002a219b14288843f6"
+    },
+    {
+      "path": "v12-tutor.js",
+      "sha256": "e63091aa6a759130bdcf01982bb44508b018f438be824f471b666f898c7eaab5"
+    },
+    {
+      "path": "v12-verification.js",
+      "sha256": "6fdf703a6565ca86516e4497f9c03fa4fb6576f64a4d8296fb4a02566795b920"
+    },
+    {
+      "path": "wrong.wav",
+      "sha256": "c7fe62397513860d29b7f23096401ffd7aba248cac60477bb052f2503eec6cab"
+    }
+  ]
+}

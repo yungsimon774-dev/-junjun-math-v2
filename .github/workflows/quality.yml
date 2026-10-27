@@ -1,0 +1,33 @@
+name: Math learning quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
+      - run: npm run test:browser
+        env:
+          TEST_OUTPUT_DIR: ${{ runner.temp }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-quality-results
+          path: |
+            ${{ runner.temp }}/build013-test-results.json
+            ${{ runner.temp }}/build013-mobile.png
+            ${{ runner.temp }}/build013-lab.png
+            ${{ runner.temp }}/build013-desktop.png
