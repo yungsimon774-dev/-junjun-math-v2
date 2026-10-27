@@ -1,5 +1,5 @@
 {
-  "release": "120150",
+  "release": "120160",
   "files": [
     {
       "path": "click.wav",
@@ -23,7 +23,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "d63c113617cd3ed239285157340a38e9bda7ce89826e63b802ffbc205abf33e7"
+      "sha256": "5344b90a743d856751401135e3672cd0a959d234e9dad3bb7828cafc9c09fafd"
     },
     {
       "path": "manifest.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "v12-app.js",
-      "sha256": "cd48774170e93c9903e3e802a8112092dc11815f66c36f3dc9fce7d282585fb3"
+      "sha256": "a94d5a9dfce31e3dc53a4bbd46c058bf855e79b128f7d530aac490b4cc41f25c"
     },
     {
       "path": "v12-bank-application.js",
@@ -55,15 +55,15 @@
     },
     {
       "path": "v12-config.js",
-      "sha256": "67563497aa69650a45a44f73182b15f810076d4b89641122e955edfa637d88b2"
+      "sha256": "74c0477b51464a8df38bbdd0a29ee2837330271b549c39919834975fae9faec4"
     },
     {
       "path": "v12-engine.js",
-      "sha256": "a8fdd5c7c6908733075c34ac2cdf3383ba2b18a3d34206b2f7c77a532f1a97f9"
+      "sha256": "4ab622b33a7bbe1799cb905feba73c746431020ddc4c08de59a5ec88b3a21989"
     },
     {
       "path": "v12-equation.js",
-      "sha256": "a80965319e347d3505c03ab04e90e1b2904b9a68b3f74ab573f96e40642903a8"
+      "sha256": "1017299fff8fdbfcdab9d4ae4aa5f6decdb389e1c6ba167aec1c9aba1f13e3be"
     },
     {
       "path": "v12-explore.js",
@@ -71,7 +71,7 @@
     },
     {
       "path": "v12-lab-view.js",
-      "sha256": "d32c2429b1a861748a7011051df89cda07287470218138882da1da15b65338d0"
+      "sha256": "d63dc0cc4e6ece4d398d35e1a5f09b6741a28c1c396694a9bc4bbe4dbc5ce8d9"
     },
     {
       "path": "v12-lab.js",
@@ -79,7 +79,7 @@
     },
     {
       "path": "v12-offline.js",
-      "sha256": "29dba218bd2afa3efb432b7238607e713d69b489c19da1a3b38c5639ca722625"
+      "sha256": "cf2103a8df0c3fbe271f790da7df85473b166d167dfb146cca6dd6bd3d0a867d"
     },
     {
       "path": "v12-open.js",
@@ -88,6 +88,10 @@
     {
       "path": "v12-progress.js",
       "sha256": "a16961ba9869b1aaff908074fa94f2c3b0cf499a7bbafb977f3450c1fdb1bdf6"
+    },
+    {
+      "path": "v12-screen-keyboard.js",
+      "sha256": "f3dbfe2c77f6a5aab6c4e7fefb791fdf479eb04e4bd67f20e0b61050dc12e414"
     },
     {
       "path": "v12-skill-map.js",
@@ -99,7 +103,7 @@
     },
     {
       "path": "v12-style.css",
-      "sha256": "4886a74ebdeeb4cb725a8e1194d427e2e0bfe83bcd434c7cad8de6fd4c9ca280"
+      "sha256": "4889d268408b51786227c3656f1c07dc4676bf7d3a88b65502f19edb850cf52e"
     },
     {
       "path": "v12-tutor.js",
@@ -111,7 +115,7 @@
     },
     {
       "path": "v12-vertical-view.js",
-      "sha256": "99e61d12b2b9fa170f7a0f3f5a7e10825ccf03ae4132e0950fefeba7b9196e64"
+      "sha256": "a78f362fa4a5c6f5fbfae563a1987fed4e822d054d9ea3f0d1be00d064298c11"
     },
     {
       "path": "v12-vertical.js",

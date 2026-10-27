@@ -1,17 +1,18 @@
-import {mountVertical} from './v12-vertical-view.js?v=120150';
-import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120150';
-import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120150';
-import {V12Store,today} from "./v12-store.js?v=120150";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120150";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120150";
+import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120160';
+import {mountVertical} from './v12-vertical-view.js?v=120160';
+import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120160';
+import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120160';
+import {V12Store,today} from "./v12-store.js?v=120160";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120160";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120160";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120150";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120150";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120160";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120160";
 
-import {verificationLabel} from "./v12-verification.js?v=120150";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120150";
-import {mountLab} from "./v12-lab-view.js?v=120150";
-import {initOffline} from "./v12-offline.js?v=120150";
+import {verificationLabel} from "./v12-verification.js?v=120160";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120160";
+import {mountLab} from "./v12-lab-view.js?v=120160";
+import {initOffline} from "./v12-offline.js?v=120160";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -26,6 +27,7 @@ let sessionResults=[];
 let currentMode="choice";
 let currentDescriptor=null;
 let currentEquationPlan=null;
+let equationKeyboard=null;
 let typed="";
 let parts=["",""];
 let activePart=0;
@@ -175,7 +177,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build015题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build016题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -329,6 +331,7 @@ function renderStageRail(currentStage){
 }
 
 function showItem(){
+  equationKeyboard?.destroy();equationKeyboard=null;
   if(itemIndex>=session.items.length){finishSession();return}
   const item=session.items[itemIndex];
   const q=item.question;
@@ -446,6 +449,7 @@ function expressionPad(){
   return `<div class="keypad expression-pad">${keys.map(key=>`<button data-key="${key}">${key}</button>`).join("")}<button class="action" data-key="=">=</button><button class="action" data-action="backspace">←</button><button class="action" data-action="clear">清除</button><button class="submit" data-action="submit">确定</button></div>`;
 }
 function renderAnswerArea(){
+  equationKeyboard?.destroy();equationKeyboard=null;
   const q=session.items[itemIndex].question;
   if(currentMode==="choice"){
     $("#answerArea").innerHTML=`<div class="choice-grid">${q.options.map((option,index)=>`<button class="choice-button" data-option="${index}">${escapeHTML(option)}</button>`).join("")}</div>`;
@@ -453,9 +457,10 @@ function renderAnswerArea(){
     return;
   }
   if(currentEquationPlan){
-    $("#answerArea").innerHTML=`<div class="fill-wrap equation-wrap"><div class="fill-label">把算式和结果都填完整</div><small>每行填写两个数、运算符和结果；加法、乘法可以交换两个数。</small>${currentEquationPlan.map((_,i)=>`<div class="equation-step">${currentEquationPlan.length>1?`<b>第${i+1}步</b>`:""}<div class="equation-row" data-equation-row="${i}"><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="a" aria-label="第${i+1}步第一个数" placeholder="数"><select data-equation-field="op" aria-label="第${i+1}步运算符"><option value="">符号</option>${["+","-","×","÷"].map(op=>`<option value="${op}">${op}</option>`).join("")}</select><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="b" aria-label="第${i+1}步第二个数" placeholder="数"><span>=</span><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="result" aria-label="第${i+1}步结果" placeholder="结果"></div></div>`).join("")}<div class="equation-actions"><button data-equation-clear>清空算式</button><button class="primary" data-equation-submit>检查算式和结果</button></div></div>`;
+    $("#answerArea").innerHTML=`<div class="fill-wrap equation-wrap"><div class="fill-label">把算式和结果都填完整</div><small>点选填写位置，用下方键盘输入。数字键直接写数，运算符接到第二个数，＝键跳到结果。</small>${currentEquationPlan.map((_,i)=>`<div class="equation-step">${currentEquationPlan.length>1?`<b>第${i+1}步</b>`:""}<div class="equation-row" data-equation-row="${i}"><input type="text" inputmode="none" readonly maxlength="12" autocomplete="off" data-equation-field="a" aria-label="第${i+1}步第一个数" placeholder="数"><input type="text" inputmode="none" readonly maxlength="1" data-equation-field="op" aria-label="第${i+1}步运算符" placeholder="符号"><input type="text" inputmode="none" readonly maxlength="12" autocomplete="off" data-equation-field="b" aria-label="第${i+1}步第二个数" placeholder="数"><span>=</span><input type="text" inputmode="none" readonly maxlength="12" autocomplete="off" data-equation-field="result" aria-label="第${i+1}步结果" placeholder="结果"></div></div>`).join("")}${screenKeyboardHTML({operators:true})}<div class="equation-actions"><button data-equation-clear>清空算式</button><button class="primary" data-equation-submit>检查算式和结果</button></div></div>`;
     $("[data-equation-submit]").onclick=submitInput;
-    $("[data-equation-clear]").onclick=()=>{if(!finalized)$$("[data-equation-field]").forEach(input=>input.value="")};
+    $("[data-equation-clear]").onclick=()=>{if(!finalized){$$("[data-equation-field]").forEach(input=>input.value="");equationKeyboard?.selectFirst()}};
+    equationKeyboard=mountScreenKeyboard($("#answerArea"),{selector:"[data-equation-field]",operators:true});
     $$("[data-equation-field]").forEach(input=>input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();submitInput()}}));
     return;
   }
@@ -551,7 +556,7 @@ function revealCorrect(entry,correct){
   }
 }
 function resetForRetry(){
-  if(currentEquationPlan){$$("[data-equation-field]").forEach(input=>input.value="");return}
+  if(currentEquationPlan){$$("[data-equation-field]").forEach(input=>input.value="");equationKeyboard?.selectFirst();return}
 
   if(currentMode==="choice"){
     if(firstWrongEntry?.selectedIndex!=null){

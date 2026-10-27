@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict');
+const {JSDOM}=require('jsdom');
+(async()=>{
+ const {screenKeyboardHTML,mountScreenKeyboard}=await import('../v12-screen-keyboard.js');
+ const dom=new JSDOM(`<div id="root"><div data-equation-row="0">${['a','op','b','result'].map(k=>`<input readonly inputmode="none" data-equation-field="${k}" aria-label="${k}" maxlength="${k==='op'?1:12}">`).join('')}</div>${screenKeyboardHTML({operators:true})}</div>`);
+ const root=dom.window.document.querySelector('#root'),field=k=>root.querySelector(`[data-equation-field="${k}"]`),click=k=>root.querySelector(`[data-screen-key="${k}"]`).click(),action=k=>root.querySelector(`[data-screen-action="${k}"]`).click();
+ const keyboard=mountScreenKeyboard(root,{selector:'[data-equation-field]',operators:true});
+ for(const k of ['6','×','5','=','3','0'])click(k);
+ assert.deepEqual(['a','op','b','result'].map(k=>field(k).value),['6','×','5','30']);
+ action('backspace');assert.equal(field('result').value,'3');action('clear');assert.equal(field('result').value,'');
+ for(const k of ['0','.','5'])click(k);assert.equal(field('result').value,'0.5');click('.');assert.equal(field('result').value,'0.5');click('±');assert.equal(field('result').value,'-0.5');
+ field('a').click();action('clear');field('a').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'7',bubbles:true,cancelable:true}));assert.equal(field('a').value,'7');
+ field('a').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'/',bubbles:true,cancelable:true}));assert.equal(field('op').value,'÷');assert.equal(field('b').getAttribute('aria-current'),'true');
+ field('a').value='';keyboard.selectFirst();assert.equal(field('a').getAttribute('aria-current'),'true');
+ assert.equal(root.querySelectorAll('.screen-digits button').length,10);assert.equal(root.querySelectorAll('select').length,0);
+ for(const el of root.querySelectorAll('input'))assert.equal(el.readOnly,true);
+ root.querySelectorAll('input').forEach(el=>el.disabled=true);keyboard.refresh();assert.ok([...root.querySelectorAll('.screen-keyboard button')].every(el=>el.disabled));keyboard.destroy();dom.window.close();
+ const v=new JSDOM(`<div id="r"><input readonly maxlength="1" data-vfield="x" aria-label="个位"><input readonly maxlength="2" data-vfield="y" aria-label="调整后">${screenKeyboardHTML()}</div>`);const vr=v.window.document.querySelector('#r');let changes=0;vr.addEventListener('input',()=>changes++);
+ const vk=mountScreenKeyboard(vr,{selector:'[data-vfield]',autoAdvance:true});
+ for(const n of ['7','1','2'])vr.querySelector(`[data-screen-key="${n}"]`).click();
+ assert.deepEqual([...vr.querySelectorAll('input')].map(el=>el.value),['7','12']);assert.equal(changes,3);assert.equal(vr.querySelector('[data-vfield="x"]').getAttribute('aria-current'),'true');vk.destroy();v.window.close();
+ console.log(JSON.stringify({screenKeyboard:'PASS',tests:['6×5=30 tap sequence','all digit keys visible','no dropdowns or writable native fields','erase and clear','decimal and sign','physical keyboard aliases','active field and disabled locking','vertical auto-advance and save events']}));
+})().catch(e=>{console.error(e);process.exit(1)});

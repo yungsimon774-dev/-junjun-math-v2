@@ -1,10 +1,13 @@
-import {verticalProblem,checkVertical,createVerticalRound,restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120150';
-import {escapeHTML as esc} from './v12-tutor.js?v=120150';
+import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120160';
+import {verticalProblem,checkVertical,createVerticalRound,restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120160';
+import {escapeHTML as esc} from './v12-tutor.js?v=120160';
 export function mountVertical(root,{draft,onSave}={}){
   let round=restoreVerticalRound(draft),submitted=Boolean(round?.pending),feedback='';let selection=round?.op||'mixed',digits=round?.digits||2;
+  let keyboard=null;
   const save=()=>onSave?.(round,round?.answers.length===5?round:null);
   const read=()=>Object.fromEntries([...root.querySelectorAll('[data-vfield]')].map(el=>[el.dataset.vfield,el.value]));
   const render=()=>{
+    keyboard?.destroy();keyboard=null;
     const index=round?.answers.length||0;const summary=round?verticalSummary(round):null;
     root.innerHTML=`<div class="vertical-practice"><p>每组5题，检查完整竖式过程。只有所有格填齐才会提交；第一次提交后计分。使用提示会单独记录。</p><div class="vertical-controls"><label>运算<select id="verticalOp">${[['mixed','四则混合'],['+','加法'],['-','减法'],['×','乘法（多位数×一位数）'],['÷','除法（一位数除数）']].map(([v,t])=>`<option value="${v}" ${v===selection?'selected':''}>${t}</option>`).join('')}</select></label><label>范围<select id="verticalDigits"><option value="2" ${digits===2?'selected':''}>两位数</option><option value="3" ${digits===3?'selected':''}>三位数</option></select></label><button id="verticalNew">${round?'重新出5题':'开始5题测试'}</button></div><small>竖式测试单独保存，不计入课程掌握率或星星奖励。</small><div id="verticalBody"></div></div>`;
     root.querySelector('#verticalOp').onchange=e=>selection=e.target.value;
@@ -19,12 +22,13 @@ export function mountVertical(root,{draft,onSave}={}){
     }
     const q=round.questions[index],p=verticalProblem(q.op,q.a,q.b);
     if(submitted){round.values=round.pending.values;feedback=checkVertical(p,round.values).correct?'✅ 竖式过程和结果都正确。':'这次竖式有需要复习的格，完成本组后可以看解析。'}
-    body.innerHTML=`<h3>第${index+1}/5题：${esc(p.title)}</h3><p>${p.op==='-'?'上方“调整后”一行填写退位处理后用于相减的数（可能大于9）。':p.op==='÷'?'先填上方的商，再填各步相乘结果和相减余数；蓝色数字是落下的一位。':'上方小格填写向该数位的进位，没有进位填0。'}</p>${board(p,round.values,submitted)}<div class="vertical-actions"><button id="verticalHint">解题提示</button>${submitted?'<button id="verticalNext">下一题</button>':'<button id="verticalCheck">提交本题竖式</button>'}</div><p id="verticalFeedback" role="status">${esc(feedback)}</p><p id="verticalHintText">${round.hintUsed?esc(p.hint):''}</p>`;
+    body.innerHTML=`<h3>第${index+1}/5题：${esc(p.title)}</h3><p>${p.op==='-'?'上方“调整后”一行填写退位处理后用于相减的数（可能大于9）。':p.op==='÷'?'先填上方的商，再填各步相乘结果和相减余数；蓝色数字是落下的一位。':'上方小格填写向该数位的进位，没有进位填0。'}</p>${board(p,round.values,submitted)}${!submitted?screenKeyboardHTML():""}<div class="vertical-actions"><button id="verticalHint">解题提示</button>${submitted?'<button id="verticalNext">下一题</button>':'<button id="verticalCheck">提交本题竖式</button>'}</div><p id="verticalFeedback" role="status">${esc(feedback)}</p><p id="verticalHintText">${round.hintUsed?esc(p.hint):''}</p>`;
     if(submitted)checkVertical(p,round.values).wrong.forEach(k=>root.querySelector(`[data-vfield="${k}"]`).classList.add('v-wrong'));
     root.querySelectorAll('[data-vfield]').forEach(el=>{
       el.oninput=()=>{round.values=read();el.classList.remove('v-wrong');save()};
       el.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();root.querySelector('#verticalCheck')?.click()}};
     });
+    if(!submitted)keyboard=mountScreenKeyboard(body,{selector:'[data-vfield]',autoAdvance:true});
     root.querySelector('#verticalHint').onclick=()=>{round.hintUsed=true;root.querySelector('#verticalHintText').textContent=p.hint;save()};
     root.querySelector('#verticalCheck')?.addEventListener('click',()=>{
       round.values=read();const result=checkVertical(p,round.values);
@@ -40,7 +44,7 @@ export function mountVertical(root,{draft,onSave}={}){
     });
   };
   function board(p,values,locked){
-    return `<div class="vertical-board" style="--vcols:${p.width}" role="group" aria-label="${esc(p.title)}竖式">${p.rows.map(row=>`<div class="vertical-line ${row.cls||''}"><span class="vertical-label">${esc(row.label)}</span>${row.cells.map(c=>c.key?`<input data-vfield="${c.key}" aria-label="${esc(c.label)}" type="text" inputmode="numeric" autocomplete="off" maxlength="2" value="${esc(typeof values[c.key]==='string'?values[c.key]:'')}" ${locked?'disabled':''}>`:`<span class="vertical-digit ${c.down?'vertical-down':''}">${esc(c.text)}</span>`).join('')}</div>`).join('')}</div>`;
+    return `<div class="vertical-board" style="--vcols:${p.width}" role="group" aria-label="${esc(p.title)}竖式">${p.rows.map(row=>`<div class="vertical-line ${row.cls||''}"><span class="vertical-label">${esc(row.label)}</span>${row.cells.map(c=>c.key?`<input data-vfield="${c.key}" aria-label="${esc(c.label)}" type="text" inputmode="none" readonly autocomplete="off" maxlength="${c.key.startsWith('work')?2:1}" value="${esc(typeof values[c.key]==='string'?values[c.key]:'')}" ${locked?'disabled':''}>`:`<span class="vertical-digit ${c.down?'vertical-down':''}">${esc(c.text)}</span>`).join('')}</div>`).join('')}</div>`;
   }
-  render();return ()=>{};
+  render();return ()=>keyboard?.destroy();
 }
