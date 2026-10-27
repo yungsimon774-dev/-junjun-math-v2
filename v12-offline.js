@@ -7,9 +7,9 @@ export function initOffline(){
   const show=text=>{status.textContent=text;status.classList.remove('hidden')};
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)location.reload()});
   navigator.serviceWorker.addEventListener('message',event=>{
-    if(event.data?.type==='OFFLINE_READY'&&event.data.release==='120140')show('当前版本的离线文件已完整校验并保存。学习记录仍保存在本机，请定期导出。');
+    if(event.data?.type==='OFFLINE_READY'&&event.data.release==='120150')show('当前版本的离线文件已完整校验并保存。学习记录仍保存在本机，请定期导出。');
   });
-  navigator.serviceWorker.register('./sw.js?v=120140').then(registration=>{
+  navigator.serviceWorker.register('./sw.js?v=120150').then(registration=>{
     const waiting=()=>{
       if(!registration.waiting)return;
       notice.classList.remove('hidden');

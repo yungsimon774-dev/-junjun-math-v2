@@ -40,6 +40,8 @@ const DEFAULT_STATE={
   explorations:[],
   verificationTasks:[],
   coachingRecords:[],
+  verticalRecords:[],
+  verticalDraft:null,
   manipulativeRecords:[],
   manipulativeDraft:null,
   diagnostic:{completed:false,grade:2,date:0,score:0,skills:{}}
@@ -87,6 +89,8 @@ function normalizeState(input={}){
   state.verificationTasks=Array.isArray(input.verificationTasks)?input.verificationTasks.filter(row=>row&&typeof row==="object"&&typeof row.sourceQid==="string"):[];
   state.coachingRecords=Array.isArray(input.coachingRecords)?input.coachingRecords.filter(row=>row&&typeof row==="object").slice(0,60):[];
   state.manipulativeRecords=Array.isArray(input.manipulativeRecords)?input.manipulativeRecords.filter(row=>row&&typeof row==="object"&&!Array.isArray(row)).slice(0,40):[];
+  state.verticalRecords=records(input.verticalRecords).slice(0,30);
+  state.verticalDraft=input.verticalDraft&&typeof input.verticalDraft==="object"?input.verticalDraft:null;
   state.manipulativeDraft=input.manipulativeDraft&&typeof input.manipulativeDraft==="object"?input.manipulativeDraft:null;
   state.rewards.claimedAchievements=Array.isArray(state.rewards.claimedAchievements)?state.rewards.claimedAchievements:[];
   state.settings.roundSize=[8,12,16,20].includes(Number(state.settings.roundSize))?Number(state.settings.roundSize):12;

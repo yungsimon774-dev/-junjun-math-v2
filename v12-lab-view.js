@@ -1,5 +1,5 @@
-import {createLab,restoreLab,changeLab,labSolved,labRecord,balanceDifference} from "./v12-lab.js?v=120140";
-import {escapeHTML} from "./v12-tutor.js?v=120140";
+import {createLab,restoreLab,changeLab,labSolved,labRecord,balanceDifference} from "./v12-lab.js?v=120150";
+import {escapeHTML} from "./v12-tutor.js?v=120150";
 
 export function mountLab(root,{draft=null,type="substitution",onSave=()=>{}}={}){
   let lab=restoreLab(draft)||createLab(type);

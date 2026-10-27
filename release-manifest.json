@@ -1,5 +1,5 @@
 {
-  "release": "120140",
+  "release": "120150",
   "files": [
     {
       "path": "click.wav",
@@ -23,7 +23,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "654ee5775e097853ac74922ce3de6659bb6c20ac7d2c5b2e93c61bb68712244e"
+      "sha256": "d63c113617cd3ed239285157340a38e9bda7ce89826e63b802ffbc205abf33e7"
     },
     {
       "path": "manifest.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "v12-app.js",
-      "sha256": "f7c0d2fdc314ec1aefc1cd899cdc01c8c582185b45fbed9a198cde8bdbb63cbd"
+      "sha256": "cd48774170e93c9903e3e802a8112092dc11815f66c36f3dc9fce7d282585fb3"
     },
     {
       "path": "v12-bank-application.js",
@@ -55,15 +55,15 @@
     },
     {
       "path": "v12-config.js",
-      "sha256": "1f6d0d9d1b811f8455f82a92ffbb3121ae3108ed9b9b307ee913fd22f09a43f4"
+      "sha256": "67563497aa69650a45a44f73182b15f810076d4b89641122e955edfa637d88b2"
     },
     {
       "path": "v12-engine.js",
-      "sha256": "e726e40d64f1e11605f425f0fe5e23ece03e77912304e9e00ceb83fd7cefb753"
+      "sha256": "a8fdd5c7c6908733075c34ac2cdf3383ba2b18a3d34206b2f7c77a532f1a97f9"
     },
     {
       "path": "v12-equation.js",
-      "sha256": "6772f14e952845f04d57d84c00b5f3ad1959cec7e869719a18cbfb3ea750b584"
+      "sha256": "a80965319e347d3505c03ab04e90e1b2904b9a68b3f74ab573f96e40642903a8"
     },
     {
       "path": "v12-explore.js",
@@ -71,7 +71,7 @@
     },
     {
       "path": "v12-lab-view.js",
-      "sha256": "d70ab60fc0acd4762a894aa071c1754b0a36558afee19ff7eb0aa155b906ff9a"
+      "sha256": "d32c2429b1a861748a7011051df89cda07287470218138882da1da15b65338d0"
     },
     {
       "path": "v12-lab.js",
@@ -79,7 +79,7 @@
     },
     {
       "path": "v12-offline.js",
-      "sha256": "65c794757bb6f0c06c2d8dd3692df21eb1dc5d2554af46f6326cc5007e23f551"
+      "sha256": "29dba218bd2afa3efb432b7238607e713d69b489c19da1a3b38c5639ca722625"
     },
     {
       "path": "v12-open.js",
@@ -95,11 +95,11 @@
     },
     {
       "path": "v12-store.js",
-      "sha256": "a77c5befa955fda60319bb9f74ed2077b351c874be678b884e9f5407831d8aaf"
+      "sha256": "f03c807c43e2e534ea0fdc24f25eea50e15b6343b6543ea3cd5eea68ad8e840e"
     },
     {
       "path": "v12-style.css",
-      "sha256": "8791515c40529be26996d56e4f98fa211d0a2069e39ad86d14c11190cf05c2fb"
+      "sha256": "4886a74ebdeeb4cb725a8e1194d427e2e0bfe83bcd434c7cad8de6fd4c9ca280"
     },
     {
       "path": "v12-tutor.js",
@@ -108,6 +108,14 @@
     {
       "path": "v12-verification.js",
       "sha256": "6fdf703a6565ca86516e4497f9c03fa4fb6576f64a4d8296fb4a02566795b920"
+    },
+    {
+      "path": "v12-vertical-view.js",
+      "sha256": "99e61d12b2b9fa170f7a0f3f5a7e10825ccf03ae4132e0950fefeba7b9196e64"
+    },
+    {
+      "path": "v12-vertical.js",
+      "sha256": "182ebf49dd5b7dc3fe03a3d2ae25f9decdcdd7ecb66a8bbdcd5d7eb4b41a0012"
     },
     {
       "path": "wrong.wav",

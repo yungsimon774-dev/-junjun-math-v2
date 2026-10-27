@@ -38,16 +38,16 @@ const {chromium}=require('playwright');
   await page.goto(testUrl);
   await fonts();
   await page.waitForFunction(()=>document.querySelectorAll('.course-card').length===14);
-  assert.match(await page.locator('#version').innerText(),/Build014/);
+  assert.match(await page.locator('#version').innerText(),/Build015/);
   assert.equal(await page.locator('#loadError').isVisible(),false);
   assert.equal(await page.locator('#statStars').innerText(),'123');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
 
   const core=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120140');
-    const {V12Store}=await import('/v12-store.js?v=120140');
-    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120140');
-    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120140');
+    const {LearningEngine}=await import('/v12-engine.js?v=120150');
+    const {V12Store}=await import('/v12-store.js?v=120150');
+    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120150');
+    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120150');
     const state=new V12Store().snapshot();
     const store={state,save(){}};
     const e=new LearningEngine(store);
@@ -117,19 +117,19 @@ const {chromium}=require('playwright');
   await page.reload();await page.locator('[data-panel="report"]').click();
   assert.match(await page.locator('#explorationReport').innerText(),/平均分/);
   await page.locator('[data-panel="home"]').click();
-  await fonts();await page.screenshot({path:path.join(outputDir,'build014-mobile.png'),fullPage:true});
+  await fonts();await page.screenshot({path:path.join(outputDir,'build015-mobile.png'),fullPage:true});
   // Wrong answer -> correction -> voluntary reflection -> report.
   await page.locator('[data-grade="1"]').click();
   await page.locator('.course-card[data-course="g1u2"]').click();await page.locator('[data-course-mode="random"]').click();
   const answer=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120140');
+    const {LearningEngine}=await import('/v12-engine.js?v=120150');
     const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
     return {index:q.answer,options:q.options};
   });
   await page.locator(`[data-option="${(answer.index+1)%answer.options.length}"]`).click();
   if(await page.locator('#checkpointCard').isVisible()){
     const value=await page.evaluate(async()=>{
-      const {LearningEngine}=await import('/v12-engine.js?v=120140');const {buildTutor}=await import('/v12-tutor.js?v=120140');
+      const {LearningEngine}=await import('/v12-engine.js?v=120150');const {buildTutor}=await import('/v12-tutor.js?v=120150');
       const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
       return String(buildTutor(q,{stage:'guided'}).checkpoint.answer);
     });
@@ -154,7 +154,7 @@ const {chromium}=require('playwright');
   await page.locator('[data-lab-action="undo"]').click();
   await page.locator('#labPalette').scrollIntoViewIfNeeded();
   const from=await page.locator('#labPalette').boundingBox(),to=await page.locator('[data-drop-side="left"]').boundingBox();
-  await page.screenshot({path:path.join(outputDir,'build014-before-touch.png')});
+  await page.screenshot({path:path.join(outputDir,'build015-before-touch.png')});
   const cdp=await page.context().newCDPSession(page);
   const x=from.x+from.width/2,y=from.y+from.height/2,tx=to.x+to.width/2,ty=to.y+to.height/2;
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
@@ -167,20 +167,20 @@ const {chromium}=require('playwright');
   await page.locator('#labAnswer').fill(String(initial.a));await page.locator('#labCheck').click();assert.match(await page.locator('#labStatus').innerText(),/一个苹果的值/);
   await page.locator('.modal-sheet').evaluate(el=>el.scrollTop=0);
   assert.equal(await page.locator('.modal-sheet').evaluate(el=>el.scrollWidth<=el.clientWidth),true);
-  await page.screenshot({path:path.join(outputDir,'build014-lab.png')});
+  await page.screenshot({path:path.join(outputDir,'build015-lab.png')});
   await page.locator('#modalClose').click();
   // Tablet/desktop fit and clear startup are retained.
   await page.setViewportSize({width:1280,height:900});await page.reload();
   await fonts();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  await page.screenshot({path:path.join(outputDir,'build014-desktop.png')});
+  await page.screenshot({path:path.join(outputDir,'build015-desktop.png')});
   // A complete, hash-checked release must work after network access is removed.
   await page.evaluate(()=>navigator.serviceWorker.ready);
   await page.reload();
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller));
   await page.context().setOffline(true);await page.reload();
   await page.waitForFunction(()=>document.querySelectorAll('.course-card').length>0);
-  assert.match(await page.locator('#version').innerText(),/Build014/);
+  assert.match(await page.locator('#version').innerText(),/Build015/);
   await page.locator('#labStart').click();assert.equal(await page.locator('#labAnswer').inputValue(),String(initial.a));await page.locator('#modalClose').click();
   await page.context().setOffline(false);
   // A partially deployed asset must prevent activation of the new offline set.
@@ -194,7 +194,7 @@ const {chromium}=require('playwright');
   await page.locator('#settingsBtn').click();await page.locator('[data-toggle="equationPractice"]').click();await page.locator('#modalClose').click();
   await page.locator('[data-panel="home"]').click();await page.locator('[data-grade="1"]').click();
   await page.locator('[data-course="g1u2"]').click();await page.evaluate(()=>{window.__savedRandom=Math.random;Math.random=()=>.999999});await page.locator('[data-course-mode="random"]').click();await page.evaluate(()=>{Math.random=window.__savedRandom;delete window.__savedRandom});
-  const equation=await page.evaluate(async()=>{const {LearningEngine}=await import('/v12-engine.js?v=120140');const {equationPlan}=await import('/v12-equation.js?v=120140');const e=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))});return equationPlan(e.catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent));});
+  const equation=await page.evaluate(async()=>{const {LearningEngine}=await import('/v12-engine.js?v=120150');const {equationPlan}=await import('/v12-equation.js?v=120150');const e=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))});return equationPlan(e.catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent));});
   assert.ok(equation?.length);
   await page.locator('[data-equation-submit]').click();assert.match(await page.locator('#feedback').innerText(),/都填完整/);
   for(const [i,row] of equation.entries()){
@@ -208,11 +208,35 @@ const {chromium}=require('playwright');
     await page.locator(`[data-equation-row="${i}"] [data-equation-field="op"]`).selectOption(row.op);
   }
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  await page.screenshot({path:path.join(outputDir,'build014-equation.png'),fullPage:true});
+  await page.screenshot({path:path.join(outputDir,'build015-equation.png'),fullPage:true});
   await page.locator('[data-equation-submit]').click();assert.equal(await page.locator('[data-equation-field="op"]').first().isDisabled(),true);
+  await page.locator('[data-panel="home"]').click();
+  const statsBeforeVertical=await page.evaluate(()=>JSON.parse(localStorage.getItem('junjun_math_v12')).stats);
+  await page.locator('#verticalStart').click();await page.locator('#verticalDigits').selectOption('3');await page.locator('#verticalNew').click();
+  await page.locator('#verticalCheck').click();assert.match(await page.locator('#verticalFeedback').innerText(),/填完整/);
+  for(let i=0;i<5;i++){
+    const problem=await page.evaluate(async()=>{const {verticalProblem}=await import('/v12-vertical.js?v=120150');const r=JSON.parse(localStorage.getItem('junjun_math_v12')).verticalDraft;const q=r.questions[r.answers.length];return verticalProblem(q.op,q.a,q.b);});
+    for(const [key,value] of Object.entries(problem.fields))await page.locator(`[data-vfield="${key}"]`).fill(value);
+    if(i===0){const key=Object.keys(problem.fields)[0];await page.locator(`[data-vfield="${key}"]`).fill(String((Number(problem.fields[key])+1)%10));}
+    if(i===1)await page.locator('#verticalHint').click();
+    await page.screenshot({path:path.join(outputDir,`build015-vertical-${i}.png`),fullPage:true});
+    assert.equal(await page.locator('.modal-sheet').evaluate(el=>el.scrollWidth<=el.clientWidth),true);
+    await page.locator('#verticalCheck').click();
+    if(i===0){
+      assert.match(await page.locator('#verticalFeedback').innerText(),/需要复习/);
+      await page.context().setOffline(true);await page.reload();await page.locator('#verticalStart').click();
+      assert.equal(await page.locator('[data-vfield]').first().isDisabled(),true);assert.ok(await page.locator('.v-wrong').count()>0);
+      await page.context().setOffline(false);await fonts();
+    }
+    await page.locator('#verticalNext').click();
+  }
+  assert.match(await page.locator('#verticalBody').innerText(),/4\/5题竖式全对/);assert.match(await page.locator('#verticalBody').innerText(),/3\/5题/);
+  const verticalState=await page.evaluate(()=>JSON.parse(localStorage.getItem('junjun_math_v12')));
+  assert.equal(verticalState.verticalRecords.length,1);assert.deepEqual(verticalState.stats,statsBeforeVertical);
+  await page.locator('#modalClose').click();await page.locator('[data-panel="report"]').click();assert.match(await page.locator('#verticalReport').innerText(),/4\/5题全对/);
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(outputDir,'build014-test-results.json'),JSON.stringify({...core,pageErrors:errors,mobileAndDesktop:true,touchDrag:true,equationEntry:true,offlineReload:true,rejectsMixedRelease:true},null,2));
-  console.log(JSON.stringify({result:'PASS',pageErrors:errors,mobileAndDesktop:true,touchDrag:true,equationEntry:true,offlineReload:true,rejectsMixedRelease:true},null,2));
+  fs.writeFileSync(path.join(outputDir,'build015-test-results.json'),JSON.stringify({...core,pageErrors:errors,mobileAndDesktop:true,touchDrag:true,equationEntry:true,verticalRound:true,offlineReload:true,rejectsMixedRelease:true},null,2));
+  console.log(JSON.stringify({result:'PASS',pageErrors:errors,mobileAndDesktop:true,touchDrag:true,equationEntry:true,verticalRound:true,offlineReload:true,rejectsMixedRelease:true},null,2));
   await browser.close();
   await new Promise(resolve=>server.close(resolve));
 })().catch(error=>{console.error(error);process.exit(1)});

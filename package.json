@@ -1,8 +1,8 @@
 {
   "name":"junjun-math-v12",
-  "version":"12.0.14",
+  "version":"12.0.15",
   "private":true,
   "type":"module",
-  "scripts":{"test":"node tests/equation.mjs && node tests/core.mjs && node tests/verification.mjs && node tests/lab.mjs && node --experimental-vm-modules tests/dom.cjs && node tests/quality.mjs","test:browser":"node tests/browser.cjs","release":"node scripts/release.mjs"},
+  "scripts":{"test":"node tests/vertical.mjs && node tests/equation.mjs && node tests/core.mjs && node tests/verification.mjs && node tests/lab.mjs && node --experimental-vm-modules tests/dom.cjs && node tests/quality.mjs","test:browser":"node tests/browser.cjs","release":"node scripts/release.mjs"},
   "devDependencies":{"playwright":"1.62.1","jsdom":"30.1.3"}
 }

@@ -1,15 +1,17 @@
-import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120140';
-import {V12Store,today} from "./v12-store.js?v=120140";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120140";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120140";
+import {mountVertical} from './v12-vertical-view.js?v=120150';
+import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120150';
+import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120150';
+import {V12Store,today} from "./v12-store.js?v=120150";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120150";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120150";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120140";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120140";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120150";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120150";
 
-import {verificationLabel} from "./v12-verification.js?v=120140";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120140";
-import {mountLab} from "./v12-lab-view.js?v=120140";
-import {initOffline} from "./v12-offline.js?v=120140";
+import {verificationLabel} from "./v12-verification.js?v=120150";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120150";
+import {mountLab} from "./v12-lab-view.js?v=120150";
+import {initOffline} from "./v12-offline.js?v=120150";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -173,7 +175,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build014题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build015题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -250,6 +252,11 @@ function renderReport(){
   $("#coachingReport").innerHTML=coaching.length?coaching.slice(0,5).map(row=>`<div class="parent-advice"><b>${escapeHTML(REFLECTIONS[row.reason]?.label||"思路记录")}</b><p>${escapeHTML(row.note)}</p><small>文字由孩子或家长记录，系统不自动判定思路正确。</small></div>`).join(""):"选择卡点后可以记录条件、所问、计算检查或图示想法。";
   const reasons=engine.errorReasons();
   const hands=state.manipulativeRecords||[];
+  const vertical=store.state.verticalRecords.map(restoreVerticalRound).filter(Boolean);
+  $("#verticalReport").innerHTML=vertical.length?vertical.slice(0,8).map(round=>{
+    const summary=verticalSummary(round);
+    return `<div class="parent-advice"><b>竖式测试 · ${round.digits}位数 · ${summary.correct}/${summary.total}题全对</b><p>未用提示全对 ${summary.independent}/${summary.total}题；加减检查进退位，乘除检查计算步骤。</p><small>${escapeHTML(round.questions.map(q=>`${q.a}${q.op}${q.b}`).join("；"))}</small></div>`;
+  }).join(""):"还没有完成的竖式测试，可从首页开始每组5题。";
   $("#manipulativeReport").innerHTML=hands.length?hands.slice(0,8).map(row=>`<div class="parent-advice"><b>${escapeHTML(row.title)} · ${row.completed?"本次图示练习完成":"正在探索"}</b><p>${escapeHTML(row.prompt||"")}</p><p>${Number(row.moves)||0}次操作 · ${Number(row.undoCount)||0}次撤回 · ${row.hintUsed?"使用过提示":"未使用提示按钮"}</p><small>想法：${escapeHTML(row.note||"未记录")}</small><details><summary>最近操作</summary><ol>${(Array.isArray(row.events)?row.events:[]).slice(-6).map(event=>`<li>${escapeHTML(event?.text||"")}</li>`).join("")}</ol></details></div>`).join(""):"还没有图示操作记录。可以从首页打开数学实验台，探索逐层代换与等式天平。";
   $("#errorReasons").innerHTML=reasons.length?reasons.slice(0,10).map(item=>`<span class="error-chip">${escapeHTML(item.reason)}<b>${item.count}</b></span>`).join(""):"暂时没有可分析的错因。";
   $("#mistakeList").innerHTML=state.mistakes.length?state.mistakes.slice(0,12).map(item=>{
@@ -772,6 +779,15 @@ function showAchievements(){
   openModal("🏆","我的成就",`<div class="achievement-list">${items.map(([icon,name,desc,done])=>`<div class="achievement ${done?"done":""}"><span>${done?icon:"🔒"}</span><div><b>${name}</b><small>${desc}</small></div><em>${done?"已解锁":"未解锁"}</em></div>`).join("")}</div>`);
 }
 
+function showVertical(){
+  openModal("🧮","竖式测试",'<div id="verticalRoot"></div>');
+  activeLabDispose=mountVertical($("#verticalRoot"),{draft:store.state.verticalDraft,onSave:(draft,completed)=>{
+    store.state.verticalDraft=draft;
+    if(completed)store.state.verticalRecords=[completed,...store.state.verticalRecords.filter(r=>r.id!==completed.id)].slice(0,30);
+    store.save();
+  }});
+}
+
 function showMathLab(){
   openModal("⚖️","峻峻的数学实验台",'<div id="mathLabRoot"></div>');
   activeLabDispose=mountLab($("#mathLabRoot"),{
@@ -944,6 +960,7 @@ function bindEvents(){
   $("#toolsBtn").onclick=showMathTools;
   $("#exploreStart").onclick=()=>showExploration(1);
   $("#openStart").onclick=()=>showOpenChallenge("multiple");
+  $("#verticalStart").onclick=showVertical;
   $("#labStart").onclick=showMathLab;
   $("#verificationStart").onclick=()=>{
     session=engine.buildVerificationSession();
