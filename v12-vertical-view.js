@@ -1,6 +1,6 @@
-import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120160';
-import {verticalProblem,checkVertical,createVerticalRound,restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120160';
-import {escapeHTML as esc} from './v12-tutor.js?v=120160';
+import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120170';
+import {verticalProblem,checkVertical,createVerticalRound,restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120170';
+import {escapeHTML as esc} from './v12-tutor.js?v=120170';
 export function mountVertical(root,{draft,onSave}={}){
   let round=restoreVerticalRound(draft),submitted=Boolean(round?.pending),feedback='';let selection=round?.op||'mixed',digits=round?.digits||2;
   let keyboard=null;

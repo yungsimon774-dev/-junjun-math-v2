@@ -1,6 +1,6 @@
 {
   "name":"junjun-math-v12",
-  "version":"12.0.16",
+  "version":"12.0.17",
   "private":true,
   "type":"module",
   "scripts":{"test":"node tests/screen-keyboard.cjs && node tests/vertical.mjs && node tests/equation.mjs && node tests/core.mjs && node tests/verification.mjs && node tests/lab.mjs && node --experimental-vm-modules tests/dom.cjs && node tests/quality.mjs","test:browser":"node tests/browser.cjs","release":"node scripts/release.mjs"},

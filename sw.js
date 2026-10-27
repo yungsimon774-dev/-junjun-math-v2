@@ -1,4 +1,4 @@
-const RELEASE='120160';
+const RELEASE='120170';
 const CACHE='junjun-math-release-'+RELEASE;
 const COMPLETE=new URL('./__release_complete__',self.registration.scope).href;
 const digest=async buffer=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)),b=>b.toString(16).padStart(2,'0')).join('');

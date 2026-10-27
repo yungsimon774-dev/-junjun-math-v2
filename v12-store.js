@@ -97,6 +97,7 @@ function normalizeState(input={}){
   state.settings.practiceMode=["learning","adaptive","review","random"].includes(state.settings.practiceMode)?state.settings.practiceMode:"learning";
   state.settings.answerMode=["smart","input","choice"].includes(state.settings.answerMode)?state.settings.answerMode:"smart";
   for(const key of ["sound","firstRetry","autoRead","focusMode","equationPractice"])if(typeof state.settings[key]!=="boolean")state.settings[key]=DEFAULT_STATE.settings[key];
+  state.settings.autoRead=false; // Retire the old preference on load and import.
   state.profile.grade=[1,2].includes(Number(state.profile.grade))?Number(state.profile.grade):2;
   state.profile.name=typeof state.profile.name==="string"?state.profile.name.slice(0,40):"峻峻";
   for(const key of Object.keys(DEFAULT_STATE.stats))state.stats[key]=count(state.stats[key]);
@@ -145,7 +146,7 @@ function migrateV11(legacy){
     answerMode:settings.answerMode==="choice"?"choice":settings.answerMode==="input"?"input":"smart",
     roundSize:[8,12,16,20].includes(Number(settings.roundSize))?Number(settings.roundSize):12,
     firstRetry:settings.firstRetry!==false,
-    autoRead:Boolean(settings.autoRead),
+    autoRead:false,
     sound:settings.sound!==false
   };
   if(legacy.daily?.date===today()){

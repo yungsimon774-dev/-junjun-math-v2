@@ -1,18 +1,18 @@
-import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120160';
-import {mountVertical} from './v12-vertical-view.js?v=120160';
-import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120160';
-import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120160';
-import {V12Store,today} from "./v12-store.js?v=120160";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120160";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120160";
+import {screenKeyboardHTML,mountScreenKeyboard} from './v12-screen-keyboard.js?v=120170';
+import {mountVertical} from './v12-vertical-view.js?v=120170';
+import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120170';
+import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120170';
+import {V12Store,today} from "./v12-store.js?v=120170";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120170";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120170";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120160";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120160";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120170";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120170";
 
-import {verificationLabel} from "./v12-verification.js?v=120160";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120160";
-import {mountLab} from "./v12-lab-view.js?v=120160";
-import {initOffline} from "./v12-offline.js?v=120160";
+import {verificationLabel} from "./v12-verification.js?v=120170";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120170";
+import {mountLab} from "./v12-lab-view.js?v=120170";
+import {initOffline} from "./v12-offline.js?v=120170";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -177,7 +177,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build016题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build017题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -375,7 +375,6 @@ function showItem(){
     renderAnswerArea();
   }
   questionStartedAt=Date.now();
-  if(store.state.settings.autoRead)setTimeout(()=>speak(q.prompt),180);
 }
 
 function chooseAnswerMode(item){
@@ -734,7 +733,6 @@ function showSettings(){
     </div></div>
     ${toggleSetting("equationPractice","列式并计算","适合列式的题填写完整算式；其他题沿用答题方式设置",settings.equationPractice)}
     ${toggleSetting("firstRetry","答错先自己改一次","第一次答错不马上公布答案",settings.firstRetry)}
-    ${toggleSetting("autoRead","自动普通话读题","找不到普通话时停止，不转广东话",settings.autoRead)}
     ${toggleSetting("sound","朗读与答题音效","关闭后完全静音",settings.sound)}
     ${toggleSetting("focusMode","学习时专注模式","进入题目后收起顶部大图",settings.focusMode)}
   </div>`);
@@ -977,7 +975,6 @@ function bindEvents(){
   $("#voiceTest").onclick=()=>speak("你好，我是普通话语音。峻峻，我们一起学习数学吧。");
   $("#modalClose").onclick=closeModal;
   $$("[data-close-modal]").forEach(element=>element.onclick=closeModal);
-  $("#readQuestion").onclick=()=>speak(session?.items?.[itemIndex]?.question?.prompt||"请先开始一道题");
   $("#hintBtn").onclick=()=>{
     if(!session||session.items[itemIndex]?.example||finalized)return;
     hints++;
