@@ -27,7 +27,8 @@ jobs:
         with:
           name: browser-quality-results
           path: |
-            ${{ runner.temp }}/build013-test-results.json
-            ${{ runner.temp }}/build013-mobile.png
-            ${{ runner.temp }}/build013-lab.png
-            ${{ runner.temp }}/build013-desktop.png
+            ${{ runner.temp }}/build014-test-results.json
+            ${{ runner.temp }}/build014-mobile.png
+            ${{ runner.temp }}/build014-lab.png
+            ${{ runner.temp }}/build014-desktop.png
+            ${{ runner.temp }}/build014-equation.png

@@ -1,14 +1,15 @@
-import {V12Store,today} from "./v12-store.js?v=120130";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120130";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120130";
+import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120140';
+import {V12Store,today} from "./v12-store.js?v=120140";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120140";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120140";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120130";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120130";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120140";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120140";
 
-import {verificationLabel} from "./v12-verification.js?v=120130";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120130";
-import {mountLab} from "./v12-lab-view.js?v=120130";
-import {initOffline} from "./v12-offline.js?v=120130";
+import {verificationLabel} from "./v12-verification.js?v=120140";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120140";
+import {mountLab} from "./v12-lab-view.js?v=120140";
+import {initOffline} from "./v12-offline.js?v=120140";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -22,6 +23,7 @@ let itemIndex=0;
 let sessionResults=[];
 let currentMode="choice";
 let currentDescriptor=null;
+let currentEquationPlan=null;
 let typed="";
 let parts=["",""];
 let activePart=0;
@@ -171,7 +173,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build013题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build014题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -335,6 +337,7 @@ function showItem(){
   parts=["",""];
   activePart=0;
   currentDescriptor=answerDescriptor(q);
+  currentEquationPlan=store.state.settings.equationPractice?equationPlan(q):null;
   currentMode=chooseAnswerMode(item);
   $("#sessionType").textContent=session.type==="learning"?(session.route?.compact?"已掌握，直接迁移挑战":"四阶段学习"):session.type==="diagnostic"?"能力诊断":session.type==="review"?"间隔复习":session.type==="random"?"随机练习":"智能强化";
   $("#gameTitle").textContent=`${session.course.icon} ${session.course.title}`;
@@ -357,7 +360,7 @@ function showItem(){
   }else{
     if(item.stage==="guided"){
       renderTutor(lesson,"引导阶段会给方法，但不直接公布答案");
-      if(lesson.checkpoint)renderCheckpoint(lesson.checkpoint);
+      if(lesson.checkpoint&&!currentEquationPlan)renderCheckpoint(lesson.checkpoint);
     }
     renderAnswerArea();
   }
@@ -366,6 +369,7 @@ function showItem(){
 }
 
 function chooseAnswerMode(item){
+  if(currentEquationPlan)return "input";
   if(item.stage==="verification")return "input";
   if(store.state.settings.answerMode==="choice")return "choice";
   if(store.state.settings.answerMode==="input")return currentDescriptor.supported?"input":"choice";
@@ -422,7 +426,7 @@ function showTutor(reveal=false){
   renderTutor(lesson,reveal?"完整讲解与答案":lesson.recoveryApplied?"针对刚才答案的纠错提示":"只显示方法，不直接公布答案");
   if(retrying&&!reveal&&$("#checkpointCard").classList.contains("hidden")){
     const guided=buildTutor(item.question,{stage:"guided",reveal:false,hintLevel:0});
-    if(guided.checkpoint)renderCheckpoint(guided.checkpoint);
+    if(guided.checkpoint&&!currentEquationPlan)renderCheckpoint(guided.checkpoint);
   }
   $("#tutorPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
@@ -439,6 +443,13 @@ function renderAnswerArea(){
   if(currentMode==="choice"){
     $("#answerArea").innerHTML=`<div class="choice-grid">${q.options.map((option,index)=>`<button class="choice-button" data-option="${index}">${escapeHTML(option)}</button>`).join("")}</div>`;
     $$("[data-option]").forEach(button=>button.onclick=()=>submitChoice(Number(button.dataset.option)));
+    return;
+  }
+  if(currentEquationPlan){
+    $("#answerArea").innerHTML=`<div class="fill-wrap equation-wrap"><div class="fill-label">把算式和结果都填完整</div><small>每行填写两个数、运算符和结果；加法、乘法可以交换两个数。</small>${currentEquationPlan.map((_,i)=>`<div class="equation-step">${currentEquationPlan.length>1?`<b>第${i+1}步</b>`:""}<div class="equation-row" data-equation-row="${i}"><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="a" aria-label="第${i+1}步第一个数" placeholder="数"><select data-equation-field="op" aria-label="第${i+1}步运算符"><option value="">符号</option>${["+","-","×","÷"].map(op=>`<option value="${op}">${op}</option>`).join("")}</select><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="b" aria-label="第${i+1}步第二个数" placeholder="数"><span>=</span><input type="text" inputmode="decimal" maxlength="12" autocomplete="off" data-equation-field="result" aria-label="第${i+1}步结果" placeholder="结果"></div></div>`).join("")}<div class="equation-actions"><button data-equation-clear>清空算式</button><button class="primary" data-equation-submit>检查算式和结果</button></div></div>`;
+    $("[data-equation-submit]").onclick=submitInput;
+    $("[data-equation-clear]").onclick=()=>{if(!finalized)$$("[data-equation-field]").forEach(input=>input.value="")};
+    $$("[data-equation-field]").forEach(input=>input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();submitInput()}}));
     return;
   }
   if(currentDescriptor.type==="compound"){
@@ -486,6 +497,14 @@ function updateEntry(){
   }
 }
 function submitInput(){
+  if(finalized)return;
+  if(currentEquationPlan){
+    const rows=$$("[data-equation-row]").map(row=>Object.fromEntries([...row.querySelectorAll("[data-equation-field]")].map(input=>[input.dataset.equationField,input.value])));
+    const result=checkEquationPlan(currentEquationPlan,rows);
+    if(result.incomplete){$("#feedback").textContent="请把每行的两个数、运算符和结果都填完整。";return}
+    grade(result.correct,result.entry);return;
+  }
+
   if(currentDescriptor.type==="compound"){
     if(parts.some(value=>value==="")){$("#feedback").textContent="请把两个空都填好。";return}
     const entry={values:parts.map(Number),value:parts.join("/")};
@@ -508,7 +527,7 @@ function markChoice(index,className,disable=false){
   if(button){button.classList.add(className);if(disable)button.disabled=true}
 }
 function disableAnswers(){
-  $("#answerArea").querySelectorAll("button,input").forEach(element=>element.disabled=true);
+  $("#answerArea").querySelectorAll("button,input,select").forEach(element=>element.disabled=true);
 }
 function revealCorrect(entry,correct){
   const item=session.items[itemIndex];
@@ -525,6 +544,8 @@ function revealCorrect(entry,correct){
   }
 }
 function resetForRetry(){
+  if(currentEquationPlan){$$("[data-equation-field]").forEach(input=>input.value="");return}
+
   if(currentMode==="choice"){
     if(firstWrongEntry?.selectedIndex!=null){
       selectedWrong.add(firstWrongEntry.selectedIndex);
@@ -694,11 +715,12 @@ function showSettings(){
       <button data-setting="practiceMode" data-value="random" class="${settings.practiceMode==="random"?"active":""}">随机</button>
     </div></div>
     <div class="setting"><b>每组题量</b><div class="segments">${[8,12,16,20].map(number=>`<button data-setting="roundSize" data-value="${number}" class="${settings.roundSize===number?"active":""}">${number}题</button>`).join("")}</div></div>
-    <div class="setting"><b>答题方式</b><div class="segments">
+    <div class="setting"><b>其他题的答题方式</b><div class="segments">
       <button data-setting="answerMode" data-value="smart" class="${settings.answerMode==="smart"?"active":""}">智能防猜</button>
       <button data-setting="answerMode" data-value="input" class="${settings.answerMode==="input"?"active":""}">尽量填空</button>
       <button data-setting="answerMode" data-value="choice" class="${settings.answerMode==="choice"?"active":""}">只做选择</button>
     </div></div>
+    ${toggleSetting("equationPractice","列式并计算","适合列式的题填写完整算式；其他题沿用答题方式设置",settings.equationPractice)}
     ${toggleSetting("firstRetry","答错先自己改一次","第一次答错不马上公布答案",settings.firstRetry)}
     ${toggleSetting("autoRead","自动普通话读题","找不到普通话时停止，不转广东话",settings.autoRead)}
     ${toggleSetting("sound","朗读与答题音效","关闭后完全静音",settings.sound)}
@@ -960,7 +982,7 @@ function bindEvents(){
   };
   document.addEventListener("keydown",event=>{
     if(event.target?.matches?.("input,textarea,select,[contenteditable=true]")||!$("#modal").classList.contains("hidden"))return;
-    if(!session||finalized||currentMode!=="input"||!$("#game").classList.contains("active"))return;
+    if(currentEquationPlan||!session||finalized||currentMode!=="input"||!$("#game").classList.contains("active"))return;
     if(/^\d$/.test(event.key)){appendKey(event.key);event.preventDefault()}
     else if(["+","-","=","(",")"].includes(event.key)){appendKey(event.key);event.preventDefault()}
     else if(event.key==="Backspace"){

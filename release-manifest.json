@@ -1,5 +1,5 @@
 {
-  "release": "120130",
+  "release": "120140",
   "files": [
     {
       "path": "click.wav",
@@ -23,7 +23,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "83327296b141eecdc515843b2de6b73b41b4f78ef5f471511220a711f95a2d06"
+      "sha256": "654ee5775e097853ac74922ce3de6659bb6c20ac7d2c5b2e93c61bb68712244e"
     },
     {
       "path": "manifest.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "v12-app.js",
-      "sha256": "85e4f6d338829b25e6f7d765e4a6a824d8b19f4b77f2025ffda49899c5d62225"
+      "sha256": "f7c0d2fdc314ec1aefc1cd899cdc01c8c582185b45fbed9a198cde8bdbb63cbd"
     },
     {
       "path": "v12-bank-application.js",
@@ -55,11 +55,15 @@
     },
     {
       "path": "v12-config.js",
-      "sha256": "88817619554f6cda469aa985139b9c2dbcf6e105d9a16fdbf8bb25b973c51272"
+      "sha256": "1f6d0d9d1b811f8455f82a92ffbb3121ae3108ed9b9b307ee913fd22f09a43f4"
     },
     {
       "path": "v12-engine.js",
-      "sha256": "48b8cc822cde4da4d3a10096d17c200261e82c521d7cbb71a3c516ee2fcd93b3"
+      "sha256": "e726e40d64f1e11605f425f0fe5e23ece03e77912304e9e00ceb83fd7cefb753"
+    },
+    {
+      "path": "v12-equation.js",
+      "sha256": "6772f14e952845f04d57d84c00b5f3ad1959cec7e869719a18cbfb3ea750b584"
     },
     {
       "path": "v12-explore.js",
@@ -67,7 +71,7 @@
     },
     {
       "path": "v12-lab-view.js",
-      "sha256": "86e8263865ad8b848bace446cf0a87211f9b34d8f07fc65b60a37d97b30905eb"
+      "sha256": "d70ab60fc0acd4762a894aa071c1754b0a36558afee19ff7eb0aa155b906ff9a"
     },
     {
       "path": "v12-lab.js",
@@ -75,7 +79,7 @@
     },
     {
       "path": "v12-offline.js",
-      "sha256": "3d5eb90a00528bacd9df5038624b9e018e889f2619e3b553f41b2accaca2d9b9"
+      "sha256": "65c794757bb6f0c06c2d8dd3692df21eb1dc5d2554af46f6326cc5007e23f551"
     },
     {
       "path": "v12-open.js",
@@ -91,11 +95,11 @@
     },
     {
       "path": "v12-store.js",
-      "sha256": "aa93745a84e0124e17e8f03d5d6817772a3cb25b32c3563375bb84b436e80f33"
+      "sha256": "a77c5befa955fda60319bb9f74ed2077b351c874be678b884e9f5407831d8aaf"
     },
     {
       "path": "v12-style.css",
-      "sha256": "8b8bb781533b5bb75d81e72f5160a65ba608af50fa7561002a219b14288843f6"
+      "sha256": "8791515c40529be26996d56e4f98fa211d0a2069e39ad86d14c11190cf05c2fb"
     },
     {
       "path": "v12-tutor.js",

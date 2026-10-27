@@ -22,6 +22,7 @@ const DEFAULT_STATE={
   settings:{
     practiceMode:"learning",
     answerMode:"smart",
+    equationPractice:true,
     roundSize:12,
     firstRetry:true,
     autoRead:false,
@@ -91,7 +92,7 @@ function normalizeState(input={}){
   state.settings.roundSize=[8,12,16,20].includes(Number(state.settings.roundSize))?Number(state.settings.roundSize):12;
   state.settings.practiceMode=["learning","adaptive","review","random"].includes(state.settings.practiceMode)?state.settings.practiceMode:"learning";
   state.settings.answerMode=["smart","input","choice"].includes(state.settings.answerMode)?state.settings.answerMode:"smart";
-  for(const key of ["sound","firstRetry","autoRead","focusMode"])if(typeof state.settings[key]!=="boolean")state.settings[key]=DEFAULT_STATE.settings[key];
+  for(const key of ["sound","firstRetry","autoRead","focusMode","equationPractice"])if(typeof state.settings[key]!=="boolean")state.settings[key]=DEFAULT_STATE.settings[key];
   state.profile.grade=[1,2].includes(Number(state.profile.grade))?Number(state.profile.grade):2;
   state.profile.name=typeof state.profile.name==="string"?state.profile.name.slice(0,40):"峻峻";
   for(const key of Object.keys(DEFAULT_STATE.stats))state.stats[key]=count(state.stats[key]);
