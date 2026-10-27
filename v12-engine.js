@@ -1,6 +1,6 @@
-import {hasSecureEvidence} from "./v12-progress.js?v=120110";
+import {hasSecureEvidence} from "./v12-progress.js?v=120120";
 
-import {eligibleVariant,verificationOutcome} from "./v12-verification.js?v=120110";
+import {eligibleVariant,verificationOutcome} from "./v12-verification.js?v=120120";
 
 const courses=Array.isArray(window.MATH_COURSES)?window.MATH_COURSES:[];
 const banks=window.MATH_QUESTIONS||{};

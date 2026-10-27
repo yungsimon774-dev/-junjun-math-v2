@@ -1,6 +1,6 @@
 window.MATH_V12_CONFIG={
   appName:"峻峻数学大冒险",
-  version:"V12长期版 · Build011 · 纠错验证与开放思维版",
+  version:"V12长期版 · Build012 · 动手图示与等量实验版",
   schemaVersion:12,
   parentPin:"2026",
   defaultGrade:2,

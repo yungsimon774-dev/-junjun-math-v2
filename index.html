@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#2468e8">
   <title>峻峻数学大冒险 V12</title>
-  <link rel="manifest" href="./manifest.json?v=120110">
-  <link rel="stylesheet" href="./v12-style.css?v=120110">
+  <link rel="manifest" href="./manifest.json?v=120120">
+  <link rel="stylesheet" href="./v12-style.css?v=120120">
 </head>
 <body>
   <div class="sky" aria-hidden="true">
@@ -28,7 +28,7 @@
       <div class="brand">
         <small>峻峻</small>
         <h1>数学大冒险</h1>
-        <span id="version">V12长期版 · Build011 · 纠错验证与开放思维版</span>
+        <span id="version">V12长期版 · Build012 · 动手图示与等量实验版</span>
       </div>
       <div class="hero-actions">
         <button id="voiceTest" aria-label="试听普通话">🔊<span>普通话</span></button>
@@ -67,6 +67,10 @@
         <div><small>🍎 等量代换 · 峻峻的思维时间</small><h2>数学探索工坊</h2><p>一层代换 → 连续代换 → 反推。换种解法，也可以自己出题。</p></div>
         <div class="explore-actions"><button id="exploreStart">开始探索</button><button id="symbolStart">等量代换完整课程</button><button id="openStart">开放思维挑战</button></div>
         <small>不限时 · 不计入考试正确率 · 想法可以说给家长听</small>
+      </article>
+
+      <article class="lab-home-card">
+        <span aria-hidden="true">⚖️</span><div><small>Build012 · 动手理解等量关系</small><h2>峻峻的数学实验台</h2><p>把水果逐层代换，或在天平两边加减单位块。可以点按，也可以拖动。</p><button id="labStart">打开数学实验台</button><small id="labResumeNote">不限时，可撤回，操作自动保留。</small></div>
       </article>
 
       <article id="diagnosticCard" class="diagnostic-card">
@@ -182,6 +186,7 @@
       <article class="report-card"><h3>探索与表达记录</h3><div id="explorationReport"></div></article>
       <article class="report-card"><h3>纠错后能否独立完成？</h3><p>变式首次无提示答对才算本次通过，不等于已全面掌握。</p><button id="verificationStart">暂无待验证内容</button><div id="verificationReport"></div></article>
       <article class="report-card"><h3>分卡点引导记录</h3><div id="coachingReport"></div></article>
+      <article class="report-card"><h3>动手图示学习记录</h3><p>这是操作与观察练习，不作为独立掌握证明；文字想法不自动判分。</p><div id="manipulativeReport"></div></article>
       <article class="report-card">
         <h3>最近错题与复习安排</h3>
         <div id="mistakeList" class="mistake-list"></div>
@@ -206,15 +211,15 @@
     </section>
   </div>
 
-  <script src="./v12-config.js?v=120110"></script>
-  <script src="./courses.js?v=120110"></script>
-  <script src="./v12-bank-foundation.js?v=120110"></script>
-  <script src="./v12-bank-application.js?v=120110"></script>
-  <script src="./v12-bank-visual.js?v=120110"></script>
-  <script src="./v12-bank-symbol.js?v=120110"></script>
-  <script src="./v12-bank-life.js?v=120110"></script>
-  <script src="./v12-skill-map.js?v=120110"></script>
-  <script type="module" src="./v12-app.js?v=120110"></script>
-  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js?v=120110").catch(()=>{})}</script>
+  <script src="./v12-config.js?v=120120"></script>
+  <script src="./courses.js?v=120120"></script>
+  <script src="./v12-bank-foundation.js?v=120120"></script>
+  <script src="./v12-bank-application.js?v=120120"></script>
+  <script src="./v12-bank-visual.js?v=120120"></script>
+  <script src="./v12-bank-symbol.js?v=120120"></script>
+  <script src="./v12-bank-life.js?v=120120"></script>
+  <script src="./v12-skill-map.js?v=120120"></script>
+  <script type="module" src="./v12-app.js?v=120120"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js?v=120120").catch(()=>{})}</script>
 </body>
 </html>

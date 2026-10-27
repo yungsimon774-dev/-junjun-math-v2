@@ -1,12 +1,13 @@
-import {V12Store,today} from "./v12-store.js?v=120110";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120110";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120110";
+import {V12Store,today} from "./v12-store.js?v=120120";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120120";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120120";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120110";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120110";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120120";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120120";
 
-import {verificationLabel} from "./v12-verification.js?v=120110";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120110";
+import {verificationLabel} from "./v12-verification.js?v=120120";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120120";
+import {mountLab} from "./v12-lab-view.js?v=120120";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -15,6 +16,7 @@ const store=new V12Store();
 const engine=new LearningEngine(store);
 
 let session=null;
+let activeLabDispose=null;
 let itemIndex=0;
 let sessionResults=[];
 let currentMode="choice";
@@ -88,6 +90,7 @@ function navigate(panel){
   if(panel==="plan")renderPlan();
 }
 function openModal(icon,title,content){
+  activeLabDispose?.();activeLabDispose=null;
   $("#modalIcon").textContent=icon;
   $("#modalTitle").textContent=title;
   $("#modalContent").innerHTML=content;
@@ -95,6 +98,7 @@ function openModal(icon,title,content){
   document.body.classList.add("modal-open");
 }
 function closeModal(){
+  activeLabDispose?.();activeLabDispose=null;
   $("#modal").classList.add("hidden");
   document.body.classList.remove("modal-open");
 }
@@ -127,6 +131,7 @@ function header(){
 function renderHome(){
   const state=store.state;
   const grade=state.profile.grade;
+  $("#labResumeNote").textContent=state.manipulativeDraft?"已保留上次操作，打开即可继续。":"不限时，可撤回，操作自动保留。";
   const plan=engine.dailyPlan();
   const recommended=plan.recommended;
   $$(".grade-switch button").forEach(button=>button.classList.toggle("active",Number(button.dataset.grade)===Number(grade)));
@@ -165,7 +170,7 @@ function renderHome(){
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build011题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build012题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -239,6 +244,8 @@ function renderReport(){
   const coaching=state.coachingRecords||[];
   $("#coachingReport").innerHTML=coaching.length?coaching.slice(0,5).map(row=>`<div class="parent-advice"><b>${escapeHTML(REFLECTIONS[row.reason]?.label||"思路记录")}</b><p>${escapeHTML(row.note)}</p><small>文字由孩子或家长记录，系统不自动判定思路正确。</small></div>`).join(""):"选择卡点后可以记录条件、所问、计算检查或图示想法。";
   const reasons=engine.errorReasons();
+  const hands=state.manipulativeRecords||[];
+  $("#manipulativeReport").innerHTML=hands.length?hands.slice(0,8).map(row=>`<div class="parent-advice"><b>${escapeHTML(row.title)} · ${row.completed?"本次图示练习完成":"正在探索"}</b><p>${escapeHTML(row.prompt||"")}</p><p>${Number(row.moves)||0}次操作 · ${Number(row.undoCount)||0}次撤回 · ${row.hintUsed?"使用过提示":"未使用提示按钮"}</p><small>想法：${escapeHTML(row.note||"未记录")}</small><details><summary>最近操作</summary><ol>${(Array.isArray(row.events)?row.events:[]).slice(-6).map(event=>`<li>${escapeHTML(event?.text||"")}</li>`).join("")}</ol></details></div>`).join(""):"还没有图示操作记录。可以从首页打开数学实验台，探索逐层代换与等式天平。";
   $("#errorReasons").innerHTML=reasons.length?reasons.slice(0,10).map(item=>`<span class="error-chip">${escapeHTML(item.reason)}<b>${item.count}</b></span>`).join(""):"暂时没有可分析的错因。";
   $("#mistakeList").innerHTML=state.mistakes.length?state.mistakes.slice(0,12).map(item=>{
     const review=state.reviews[item.qid];
@@ -739,6 +746,22 @@ function showAchievements(){
   openModal("🏆","我的成就",`<div class="achievement-list">${items.map(([icon,name,desc,done])=>`<div class="achievement ${done?"done":""}"><span>${done?icon:"🔒"}</span><div><b>${name}</b><small>${desc}</small></div><em>${done?"已解锁":"未解锁"}</em></div>`).join("")}</div>`);
 }
 
+function showMathLab(){
+  openModal("⚖️","峻峻的数学实验台",'<div id="mathLabRoot"></div>');
+  activeLabDispose=mountLab($("#mathLabRoot"),{
+    draft:store.state.manipulativeDraft,
+    onSave:(record,draft)=>{
+      store.state.manipulativeDraft=draft;
+      if(record.moves||record.note||record.completed||record.hintUsed){
+        store.state.manipulativeRecords=[record,...store.state.manipulativeRecords.filter(row=>row.id!==record.id)].slice(0,40);
+      }
+      store.save();
+      $("#labResumeNote").textContent="已保留上次操作，打开即可继续。";
+      if($("#report").classList.contains("active"))renderReport();
+    }
+  });
+}
+
 function showOpenChallenge(kind="multiple"){
   const challenge=createOpenChallenge(kind);
   const solutions=[];
@@ -895,6 +918,7 @@ function bindEvents(){
   $("#toolsBtn").onclick=showMathTools;
   $("#exploreStart").onclick=()=>showExploration(1);
   $("#openStart").onclick=()=>showOpenChallenge("multiple");
+  $("#labStart").onclick=showMathLab;
   $("#verificationStart").onclick=()=>{
     session=engine.buildVerificationSession();
     if(!session.items.length){openModal("🔎","暂时没有合适的验证题","<p>待验证内容继续保留，未标记为通过。可以先回完整课程巩固。</p>");return}

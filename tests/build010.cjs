@@ -14,16 +14,16 @@ const {chromium}=require('playwright');
   });
   await page.goto(process.env.TEST_URL||'http://127.0.0.1:8765/');
   await page.waitForFunction(()=>document.querySelectorAll('.course-card').length===14);
-  assert.match(await page.locator('#version').innerText(),/Build011/);
+  assert.match(await page.locator('#version').innerText(),/Build012/);
   assert.equal(await page.locator('#loadError').isVisible(),false);
   assert.equal(await page.locator('#statStars').innerText(),'123');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
 
   const core=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120110');
-    const {V12Store}=await import('/v12-store.js?v=120110');
-    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120110');
-    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120110');
+    const {LearningEngine}=await import('/v12-engine.js?v=120120');
+    const {V12Store}=await import('/v12-store.js?v=120120');
+    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120120');
+    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120120');
     const state=new V12Store().snapshot();
     const store={state,save(){}};
     const e=new LearningEngine(store);
@@ -94,16 +94,17 @@ const {chromium}=require('playwright');
   await page.locator('[data-panel="home"]').click();
   await page.screenshot({path:path.join(outputDir,'build010-mobile.png'),fullPage:true});
   // Wrong answer -> correction -> voluntary reflection -> report.
-  await page.locator('.course-card[data-course="g2u11"]').click();await page.locator('[data-course-mode="random"]').click();
+  await page.locator('[data-grade="1"]').click();
+  await page.locator('.course-card[data-course="g1u2"]').click();await page.locator('[data-course-mode="random"]').click();
   const answer=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120110');
+    const {LearningEngine}=await import('/v12-engine.js?v=120120');
     const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
     return {index:q.answer,options:q.options};
   });
   await page.locator(`[data-option="${(answer.index+1)%answer.options.length}"]`).click();
   if(await page.locator('#checkpointCard').isVisible()){
     const value=await page.evaluate(async()=>{
-      const {LearningEngine}=await import('/v12-engine.js?v=120110');const {buildTutor}=await import('/v12-tutor.js?v=120110');
+      const {LearningEngine}=await import('/v12-engine.js?v=120120');const {buildTutor}=await import('/v12-tutor.js?v=120120');
       const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
       return String(buildTutor(q,{stage:'guided'}).checkpoint.answer);
     });
