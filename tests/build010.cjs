@@ -5,25 +5,34 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 (async()=>{
   const outputDir=process.env.TEST_OUTPUT_DIR||require('node:os').tmpdir();
-  const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--no-zygote','--single-process','--in-process-gpu','--use-gl=angle','--use-angle=swiftshader']});
+  const root=path.resolve(__dirname,'..');
+  const server=require('node:http').createServer((req,res)=>{
+    const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+    const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+    if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return}
+    try{const ext=path.extname(file);res.setHeader('Content-Type',({'.js':'application/javascript','.html':'text/html; charset=utf-8','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.wav':'audio/wav'})[ext]||'application/octet-stream');res.end(fs.readFileSync(file))}catch{res.writeHead(404).end()}
+  });
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const testUrl=process.env.TEST_URL||`http://127.0.0.1:${server.address().port}/`;
+  const browser=await chromium.launch({headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--no-sandbox','--disable-dev-shm-usage','--no-zygote','--disable-gpu','--disable-software-rasterizer']});
   const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
   await page.addInitScript(()=>{
     if(!localStorage.getItem('junjun_math_v12'))localStorage.setItem('junjun_math_v12',JSON.stringify({schema:12,profile:{name:'峻峻',grade:2},stats:{stars:123,attempts:10,firstCorrect:8},settings:{sound:false,autoRead:false,answerMode:'choice',roundSize:8},mistakes:[],sessions:[]}));
   });
-  await page.goto(process.env.TEST_URL||'http://127.0.0.1:8765/');
+  await page.goto(testUrl);
   await page.waitForFunction(()=>document.querySelectorAll('.course-card').length===14);
-  assert.match(await page.locator('#version').innerText(),/Build012/);
+  assert.match(await page.locator('#version').innerText(),/Build013/);
   assert.equal(await page.locator('#loadError').isVisible(),false);
   assert.equal(await page.locator('#statStars').innerText(),'123');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
 
   const core=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120120');
-    const {V12Store}=await import('/v12-store.js?v=120120');
-    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120120');
-    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120120');
+    const {LearningEngine}=await import('/v12-engine.js?v=120130');
+    const {V12Store}=await import('/v12-store.js?v=120130');
+    const {hasSecureEvidence,independentSummary}=await import('/v12-progress.js?v=120130');
+    const {createExploration,checkExploration}=await import('/v12-explore.js?v=120130');
     const state=new V12Store().snapshot();
     const store={state,save(){}};
     const e=new LearningEngine(store);
@@ -34,6 +43,7 @@ const {chromium}=require('playwright');
     const secure=hasSecureEvidence({recentEvidence:proof});
     const rejects=[proof.slice(0,4),proof.map(r=>({...r,qid:'same'})),proof.map(r=>({...r,hints:1})),proof.map(r=>({...r,stage:'independent'})),proof.map(r=>({...r,at:Date.now()-15*86400000})),[...proof.slice(0,4),{...proof[4],firstCorrect:false}]].every(recentEvidence=>!hasSecureEvidence({recentEvidence}));
     for(const id of skills)state.skillStats[id]={recentEvidence:proof};
+    state.unitStats={};for(const unit of e.unitsByCourse.get("g1u2"))state.unitStats[unit.id]={recentEvidence:proof};
     const compact=e.buildLearningSession('g1u2');
     const q=compact.items[0].question;
     state.reviews[q.qid]={qid:q.qid,dueDate:'2000-01-01',box:0};
@@ -97,14 +107,14 @@ const {chromium}=require('playwright');
   await page.locator('[data-grade="1"]').click();
   await page.locator('.course-card[data-course="g1u2"]').click();await page.locator('[data-course-mode="random"]').click();
   const answer=await page.evaluate(async()=>{
-    const {LearningEngine}=await import('/v12-engine.js?v=120120');
+    const {LearningEngine}=await import('/v12-engine.js?v=120130');
     const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
     return {index:q.answer,options:q.options};
   });
   await page.locator(`[data-option="${(answer.index+1)%answer.options.length}"]`).click();
   if(await page.locator('#checkpointCard').isVisible()){
     const value=await page.evaluate(async()=>{
-      const {LearningEngine}=await import('/v12-engine.js?v=120120');const {buildTutor}=await import('/v12-tutor.js?v=120120');
+      const {LearningEngine}=await import('/v12-engine.js?v=120130');const {buildTutor}=await import('/v12-tutor.js?v=120130');
       const q=new LearningEngine({state:JSON.parse(localStorage.getItem('junjun_math_v12'))}).catalog.find(q=>q.prompt===document.querySelector('#questionText').textContent);
       return String(buildTutor(q,{stage:'guided'}).checkpoint.answer);
     });
@@ -123,4 +133,5 @@ const {chromium}=require('playwright');
   fs.writeFileSync(path.join(outputDir,'build010-test-results.json'),JSON.stringify({...core,pageErrors:errors,mobileAndDesktop:true,uiFlows:'exploration, creation, step hints, persistence, correction, reflection, parent report'},null,2));
   console.log(JSON.stringify({...core,pageErrors:errors},null,2));
   await browser.close();
+  await new Promise(resolve=>server.close(resolve));
 })().catch(error=>{console.error(error);process.exit(1)});

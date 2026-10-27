@@ -1,0 +1,32 @@
+{
+  "version": "V12 Build013",
+  "automated_checks": "PASS",
+  "effective_questions": 21509,
+  "tutor_automated_checks": 21509,
+  "fillable_answer_checks": 20627,
+  "teaching_methods": 43,
+  "learning_units": 1004,
+  "existing_exploration_cases": 972,
+  "open_cases": 338,
+  "manipulative_cases": 120,
+  "manipulative_steps": 390,
+  "verified_offline_assets": 27,
+  "browser": {
+    "engine": "Chromium 131 headless",
+    "viewports": [
+      "390x844",
+      "1280x900"
+    ],
+    "touch_sequence": "PASS",
+    "offline_reload": "PASS",
+    "reject_mixed_release": "PASS",
+    "page_errors": []
+  },
+  "limits": [
+    "No Safari or physical iPhone/iPad validation",
+    "No real-device speech validation",
+    "No claim that automated checks prove all word-problem semantics",
+    "No measured teaching-effectiveness claim",
+    "Original live URL not updated"
+  ]
+}

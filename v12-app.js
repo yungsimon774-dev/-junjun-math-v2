@@ -1,13 +1,14 @@
-import {V12Store,today} from "./v12-store.js?v=120120";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120120";
-import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120120";
+import {V12Store,today} from "./v12-store.js?v=120130";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120130";
+import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120130";
 
-import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120120";
-import {createExploration,checkExploration} from "./v12-explore.js?v=120120";
+import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120130";
+import {createExploration,checkExploration} from "./v12-explore.js?v=120130";
 
-import {verificationLabel} from "./v12-verification.js?v=120120";
-import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120120";
-import {mountLab} from "./v12-lab-view.js?v=120120";
+import {verificationLabel} from "./v12-verification.js?v=120130";
+import {createOpenChallenge,checkOpenChallenge} from "./v12-open.js?v=120130";
+import {mountLab} from "./v12-lab-view.js?v=120130";
+import {initOffline} from "./v12-offline.js?v=120130";
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -164,13 +165,13 @@ function renderHome(){
       <h3>${escapeHTML(course.title)}</h3>
       <p>${escapeHTML(map.goal||course.desc)}</p>
       ${route.secure?`<small class="route-note">${route.secure}/${route.skills}个题型近期独立掌握，减少重复练习</small>`:""}
-      <div class="mastery-line"><span>掌握 ${status.score}%</span><div class="mastery-track"><i style="width:${status.score}%"></i></div></div>
+      <div class="mastery-line"><span>课程进展 ${status.score}% · 已练${engine.courseCoverage(course.id).practiced}/${engine.courseCoverage(course.id).total}类</span><div class="mastery-track"><i style="width:${status.score}%"></i></div></div>
       <div class="course-go"><span>${escapeHTML(map.domain||"综合数学")}</span><b>${status.level==="未开始"?"开始学习":"继续学习"} →</b></div>
     </button>`;
   }).join("");
   $$(".course-card").forEach(button=>button.onclick=()=>showCourseChoice(button.dataset.course));
   const stats=engine.bankStats();
-  $("#bankSummary").textContent=`Build012题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
+  $("#bankSummary").textContent=`Build013题库审计：${stats.courses}个课程 · ${stats.rawQuestions.toLocaleString()}道原题 · 去除${stats.exactDuplicatesRemoved.toLocaleString()}道完全重复题 · ${stats.questions.toLocaleString()}道有效题 · ${stats.templates}种结构 · ${stats.fillable.toLocaleString()}道可防猜 · ${stats.repairedQuestions.toLocaleString()}道旧题语义已校正`;
 }
 
 function showCourseChoice(courseId){
@@ -212,6 +213,8 @@ function renderPlan(){
 
 function renderReport(){
   const state=store.state;
+  $("#restoreImport").classList.toggle("hidden",!store.hasImportBackup());
+  $("#exportRecovery").classList.toggle("hidden",!store.recoveryRaw);
   const accuracy=state.stats.attempts?Math.round(state.stats.firstCorrect/state.stats.attempts*100):0;
   const independent=independentSummary(state);
   $("#reportStats").innerHTML=[
@@ -219,7 +222,7 @@ function renderReport(){
     ["首次正确",state.stats.attempts?accuracy+"%":"—"],
     ["自主纠错",state.stats.recovered],
     ["无提示独立答对",independent.rate===null?"—":independent.rate+"%"],
-    ["总体掌握",state.stats.attempts?engine.overallMastery()+"%":"—"],
+    ["本年级进展",state.stats.attempts?engine.overallMastery()+"%":"—"],
     ["待复习",engine.dueReviews().length],
     ["学习场次",state.stats.completedSessions],
     ["累计星星",state.stats.stars]
@@ -381,7 +384,7 @@ function renderCheckpoint(checkpoint){
   $("#checkpointCheck").onclick=()=>{
     const value=$("#checkpointInput").value.trim();
     if(!value){$("#checkpointFeedback").textContent="请先填写第一步的答案。";return}
-    if(Number(value)===checkpoint.answer){
+    if(/^[+-]?\d+(?:\.\d+)?$/.test(value)&&Number(value)===checkpoint.answer){
       checkpointPassed=true;
       $("#checkpointFeedback").textContent="✅ 第一步正确，再完成最后的问题。";
       $("#checkpointInput").disabled=true;
@@ -576,11 +579,11 @@ function finalizeAnswer({firstCorrect,recovered,entry}){
     firstWrongEntry
   };
   const updated=engine.recordResult(item,result);
-  sessionResults.push({skillId:q.skillId,firstCorrect,recovered,stage:item.stage,qid:q.qid});
+  sessionResults.push({skillId:q.skillId,firstCorrect,recovered,stage:item.stage,qid:q.qid,elapsedMs:Math.max(0,Math.min(600000,result.elapsedMs))});
   revealCorrect(entry,firstCorrect||recovered);
   disableAnswers();
   if(firstCorrect){
-    $("#feedback").innerHTML=`✅ 首次答对！知识点掌握度更新为 <b>${updated.skillMastery}%</b>。${feedbackTutorHTML(q)}`;
+    $("#feedback").innerHTML=`✅ 首次答对！这个题型的练习表现估计为 <b>${updated.skillMastery}%</b>。${feedbackTutorHTML(q)}`;
     play("correct");celebrate(11);speak("答对了，真厉害");
   }else if(recovered){
     $("#feedback").innerHTML=`🛠️ 自己改对了！首次错误仍会保留在统计里，但已记录“自主纠错”。${feedbackTutorHTML(q)}`;
@@ -649,11 +652,12 @@ function nextItem(){
   showItem();
 }
 function finishSession(){
+  if(session.completedAt)return;
   const total=sessionResults.length;
   const firstCorrect=sessionResults.filter(result=>result.firstCorrect).length;
   const recovered=sessionResults.filter(result=>result.recovered).length;
   const score=total?Math.round(firstCorrect/total*100):0;
-  const minutes=Math.max(1,Math.round((Date.now()-session.startedAt)/60000));
+  const minutes=Math.round(sessionResults.reduce((sum,result)=>sum+Number(result.elapsedMs||0),0)/60000);
   engine.completeSession(session,{score,firstCorrect,recovered,total,minutes,results:sessionResults});
   $("#gameProgress").style.width="100%";
   $("#stageRail").innerHTML="";
@@ -882,8 +886,7 @@ function resetRecord(){
   const pin=prompt("请输入家长密码");
   if(pin!==(cfg.parentPin||"2026"))return;
   if(confirm("确定清除全部V12学习记录吗？")){
-    store.reset();
-    location.reload();
+    try{store.reset();location.reload()}catch(error){alert(error.message)}
   }
 }
 
@@ -895,6 +898,7 @@ function renderAll(){
 }
 
 function bindEvents(){
+  window.addEventListener("junjun-storage-status",renderStorageStatus);
   $$(".nav-button").forEach(button=>button.onclick=()=>navigate(button.dataset.panel));
   $$("[data-go-home]").forEach(button=>button.onclick=()=>navigate("home"));
   $$(".grade-switch button").forEach(button=>button.onclick=()=>{
@@ -936,19 +940,34 @@ function bindEvents(){
     hintLevel++;
     showTutor(false);
   };
-  $("#moreHint").onclick=()=>{hints++;hintLevel++;showTutor(false)};
+  $("#moreHint").onclick=()=>{
+    if(!session||finalized||session.items[itemIndex]?.example)return;
+    hints++;hintLevel++;showTutor(false);
+  };
   $("#closeTutor").onclick=()=>$("#tutorPanel").classList.add("hidden");
   $("#nextQuestion").onclick=nextItem;
   $("#exportRecord").onclick=exportRecord;
   $("#importRecord").onclick=()=>$("#recordFile").click();
   $("#recordFile").onchange=event=>importRecord(event.target.files?.[0]);
   $("#resetRecord").onclick=resetRecord;
+  $("#restoreImport").onclick=()=>{
+    if(!confirm("恢复上次导入前的记录？当前记录会作为新的备份保留。建议先导出当前记录。"))return;
+    try{store.restoreImportBackup();location.reload()}catch(error){alert(error.message)}
+  };
+  $("#exportRecovery").onclick=()=>{
+    if(!store.recoveryRaw)return;
+    const link=document.createElement("a");link.href=URL.createObjectURL(new Blob([store.recoveryRaw],{type:"text/plain;charset=utf-8"}));link.download="峻峻数学_异常记录原文.txt";link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+  };
   document.addEventListener("keydown",event=>{
     if(event.target?.matches?.("input,textarea,select,[contenteditable=true]")||!$("#modal").classList.contains("hidden"))return;
     if(!session||finalized||currentMode!=="input"||!$("#game").classList.contains("active"))return;
     if(/^\d$/.test(event.key)){appendKey(event.key);event.preventDefault()}
     else if(["+","-","=","(",")"].includes(event.key)){appendKey(event.key);event.preventDefault()}
-    else if(event.key==="Backspace"){typed=typed.slice(0,-1);updateEntry();event.preventDefault()}
+    else if(event.key==="Backspace"){
+      if(currentDescriptor.type==="compound")parts[activePart]=parts[activePart].slice(0,-1);
+      else typed=typed.slice(0,-1);
+      updateEntry();event.preventDefault();
+    }
     else if(event.key==="Enter"){submitInput();event.preventDefault()}
   });
 }
@@ -1003,6 +1022,12 @@ function runtimeSelfTest(){
   return problems;
 }
 
+function renderStorageStatus(){
+  const text=store.storageError||store.notice;
+  $("#storageStatus").textContent=text;
+  $("#storageStatus").classList.toggle("hidden",!text);
+}
+
 function init(){
   const problems=runtimeSelfTest();
   if(problems.length){
@@ -1011,11 +1036,14 @@ function init(){
     return;
   }
   bindEvents();
+  renderStorageStatus();
+  initOffline();
   loadVoices();
   if(window.speechSynthesis)speechSynthesis.onvoiceschanged=loadVoices;
   renderAll();
-  if(store.state.migratedFromV11&&!localStorage.getItem("junjun_v12_migration_seen")){
-    localStorage.setItem("junjun_v12_migration_seen","1");
+  let migrationSeen=true;
+  try{migrationSeen=localStorage.getItem("junjun_v12_migration_seen");if(store.state.migratedFromV11&&!migrationSeen)localStorage.setItem("junjun_v12_migration_seen","1")}catch{}
+  if(store.state.migratedFromV11&&!migrationSeen){
     openModal("✅","旧版记录已保留",`<div class="reward-box"><div>🧳</div><b>V11学习记录已迁移到V12</b><p>星星、成绩、错题、课程练习和设置均继续保留；V11原记录没有被删除。</p><button id="migrationDone" class="claim-button">开始使用V12</button></div>`);
     $("#migrationDone").onclick=closeModal;
   }

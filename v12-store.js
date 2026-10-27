@@ -1,5 +1,6 @@
 const KEY="junjun_math_v12";
 const V11_KEY="junjun_math_v10";
+const IMPORT_BACKUP_KEY=KEY+"_before_import";
 
 const clone=value=>JSON.parse(JSON.stringify(value));
 const safeParse=(raw,fallback={})=>{try{return JSON.parse(raw)}catch{return fallback}};
@@ -30,6 +31,7 @@ const DEFAULT_STATE={
   completedCourses:[],
   courseStats:{},
   skillStats:{},
+  unitStats:{},
   questionStats:{},
   mistakes:[],
   reviews:{},
@@ -42,7 +44,27 @@ const DEFAULT_STATE={
   diagnostic:{completed:false,grade:2,date:0,score:0,skills:{}}
 };
 
+const object=value=>value&&typeof value==="object"&&!Array.isArray(value)?value:{};
+const count=value=>Number.isFinite(Number(value))?Math.max(0,Math.min(1e15,Math.floor(Number(value)))):0;
+const records=value=>Array.isArray(value)?value.filter(row=>row&&typeof row==="object"&&!Array.isArray(row)):[];
+function normalizeStats(value){
+  const stats={...object(value)};
+  for(const key of ["attempts","firstCorrect","correct","recovered","hints","totalMs","sessions","transferCorrect"]){
+    if(key in stats)stats[key]=count(stats[key]);
+  }
+  if("attempts" in stats){
+    if("firstCorrect" in stats)stats.firstCorrect=Math.min(stats.attempts,stats.firstCorrect);
+    if("correct" in stats)stats.correct=Math.min(stats.attempts,stats.correct);
+    if("recovered" in stats)stats.recovered=Math.min(stats.attempts,stats.recovered);
+  }
+  stats.stage=Object.fromEntries(Object.entries(object(stats.stage)).filter(([,row])=>row&&typeof row==="object").map(([key,row])=>[key,{attempts:count(row.attempts),correct:Math.min(count(row.attempts),count(row.correct)),recovered:count(row.recovered)}]));
+  stats.errorReasons=Object.fromEntries(Object.entries(object(stats.errorReasons)).map(([key,value])=>[key,count(value)]));
+  return stats;
+}
+
 function normalizeState(input={}){
+  if(!input||typeof input!=="object"||Array.isArray(input))throw new Error("学习记录应为一个对象");
+  if(input.schema!=null&&Number(input.schema)!==12)throw new Error("记录版本不受支持");
   const state={
     ...clone(DEFAULT_STATE),
     ...input,
@@ -54,12 +76,12 @@ function normalizeState(input={}){
     diagnostic:{...DEFAULT_STATE.diagnostic,...(input.diagnostic||{})}
   };
   state.completedCourses=Array.isArray(input.completedCourses)?input.completedCourses:[];
-  state.courseStats=input.courseStats&&typeof input.courseStats==="object"?input.courseStats:{};
-  state.skillStats=input.skillStats&&typeof input.skillStats==="object"?input.skillStats:{};
-  state.questionStats=input.questionStats&&typeof input.questionStats==="object"?input.questionStats:{};
-  state.mistakes=Array.isArray(input.mistakes)?input.mistakes:[];
-  state.reviews=input.reviews&&typeof input.reviews==="object"?input.reviews:{};
-  state.sessions=Array.isArray(input.sessions)?input.sessions:[];
+  for(const key of ["courseStats","skillStats","questionStats","unitStats"]){
+    state[key]=Object.fromEntries(Object.entries(object(input[key])).filter(([,value])=>value&&typeof value==="object"&&!Array.isArray(value)).map(([id,value])=>[id,normalizeStats(value)]));
+  }
+  state.mistakes=records(input.mistakes);
+  state.reviews=Object.fromEntries(Object.entries(object(input.reviews)).filter(([,row])=>row&&typeof row==="object"&&!Array.isArray(row)));
+  state.sessions=records(input.sessions);
   state.explorations=Array.isArray(input.explorations)?input.explorations.filter(row=>row&&typeof row==="object"&&!Array.isArray(row)).slice(0,40):[];
   state.verificationTasks=Array.isArray(input.verificationTasks)?input.verificationTasks.filter(row=>row&&typeof row==="object"&&typeof row.sourceQid==="string"):[];
   state.coachingRecords=Array.isArray(input.coachingRecords)?input.coachingRecords.filter(row=>row&&typeof row==="object").slice(0,60):[];
@@ -69,6 +91,15 @@ function normalizeState(input={}){
   state.settings.roundSize=[8,12,16,20].includes(Number(state.settings.roundSize))?Number(state.settings.roundSize):12;
   state.settings.practiceMode=["learning","adaptive","review","random"].includes(state.settings.practiceMode)?state.settings.practiceMode:"learning";
   state.settings.answerMode=["smart","input","choice"].includes(state.settings.answerMode)?state.settings.answerMode:"smart";
+  for(const key of ["sound","firstRetry","autoRead","focusMode"])if(typeof state.settings[key]!=="boolean")state.settings[key]=DEFAULT_STATE.settings[key];
+  state.profile.grade=[1,2].includes(Number(state.profile.grade))?Number(state.profile.grade):2;
+  state.profile.name=typeof state.profile.name==="string"?state.profile.name.slice(0,40):"峻峻";
+  for(const key of Object.keys(DEFAULT_STATE.stats))state.stats[key]=count(state.stats[key]);
+  for(const key of ["independentObserved","independentCorrect"])if(key in state.stats)state.stats[key]=count(state.stats[key]);
+  state.stats.firstCorrect=Math.min(state.stats.attempts,state.stats.firstCorrect);
+  state.stats.recovered=Math.min(state.stats.attempts,state.stats.recovered);
+  if("independentCorrect" in state.stats)state.stats.independentCorrect=Math.min(count(state.stats.independentObserved),state.stats.independentCorrect);
+  for(const key of ["attempts","firstCorrect","recovered","totalMs","minutes","sessions"])state.daily[key]=count(state.daily[key]);
   state.schema=12;
   return state;
 }
@@ -133,12 +164,26 @@ function migrateV11(legacy){
 
 export class V12Store{
   constructor(){
-    const current=safeParse(localStorage.getItem(KEY),null);
-    if(current){
-      this.state=normalizeState(current);
-    }else{
-      const legacy=safeParse(localStorage.getItem(V11_KEY),null);
-      this.state=legacy?migrateV11(legacy):normalizeState({});
+    this.storageError="";this.notice="";this.recoveryRaw=null;this.canWrite=true;
+    let raw=null;
+    try{raw=localStorage.getItem(KEY)}catch{this.canWrite=false;this.storageError="此浏览器未允许本地保存；当前可继续使用，离开前请导出记录。"}
+    if(raw!=null){
+      try{
+        const parsed=JSON.parse(raw);
+        if(parsed?.schema!=null&&Number(parsed.schema)!==12){this.canWrite=false;this.storageError="记录来自当前程序不支持的版本，原记录未覆盖。请保留备份后使用对应版本。"}
+        this.state=normalizeState(parsed);
+      }
+      catch{
+        this.recoveryRaw=raw;
+        try{const key=KEY+"_recovery_"+Date.now();localStorage.setItem(key,raw);localStorage.setItem(KEY+"_recovery_latest",key);this.notice="发现无法读取的旧记录，已另存原始内容。可导出恢复文本；当前使用新的临时学习进度。"}
+        catch{this.canWrite=false;this.storageError="旧记录无法读取，且未能另存备份。原记录未覆盖；请导出恢复文本和当前记录。"}
+      }
+    }
+    if(!this.recoveryRaw){try{const key=localStorage.getItem(KEY+"_recovery_latest");if(key)this.recoveryRaw=localStorage.getItem(key)}catch{}}
+    if(!this.state){
+      let legacy=null;
+      try{legacy=safeParse(localStorage.getItem(V11_KEY),null)}catch{}
+      try{this.state=legacy&&typeof legacy==="object"?migrateV11(legacy):normalizeState({})}catch{this.state=normalizeState({})}
       this.state.createdAt=Date.now();
     }
     this.ensureToday();
@@ -154,7 +199,21 @@ export class V12Store{
   save(){
     this.ensureToday();
     this.state.updatedAt=Date.now();
-    localStorage.setItem(KEY,JSON.stringify(this.state));
+    if(!this.canWrite){this.notifyStorage();return false}
+    try{localStorage.setItem(KEY,JSON.stringify(this.state));this.storageError="";this.notifyStorage();return true}
+    catch{this.storageError="本地记录未能保存，可能空间不足或保存被限制。请在离开前导出记录。";this.notifyStorage();return false}
+  }
+
+  notifyStorage(){
+    if(typeof window!=="undefined"&&typeof window.dispatchEvent==="function"&&typeof CustomEvent!=="undefined")window.dispatchEvent(new CustomEvent("junjun-storage-status"));
+  }
+
+  hasImportBackup(){try{return Boolean(localStorage.getItem(IMPORT_BACKUP_KEY))}catch{return false}}
+
+  restoreImportBackup(){
+    let payload;try{payload=JSON.parse(localStorage.getItem(IMPORT_BACKUP_KEY))}catch{throw new Error("未找到可读取的导入前备份")}
+    if(!payload)throw new Error("还没有导入前备份");
+    this.importPayload(payload);
   }
 
   snapshot(){
@@ -173,20 +232,29 @@ export class V12Store{
 
   importPayload(payload){
     const data=payload?.data||payload;
-    if(!data||typeof data!=="object")throw new Error("学习记录格式不正确");
+    if(!data||typeof data!=="object"||Array.isArray(data))throw new Error("学习记录格式不正确");
+    let next;
     if(Number(data.schema)===12){
-      this.state=normalizeState(data);
+      next=normalizeState(data);
     }else if(Array.isArray(data.mistakes)&&("stars" in data||"attempts" in data)){
-      this.state=migrateV11(data);
+      next=migrateV11(data);
     }else{
       throw new Error("无法识别这份学习记录");
     }
-    this.save();
+    if(!this.canWrite)throw new Error("浏览器未允许保存，本次没有替换原记录。请先导出当前进度。");
+    next.updatedAt=Date.now();
+    if(next.daily.date!==today())next.daily={...DEFAULT_STATE.daily,date:today()};
+    try{
+      localStorage.setItem(IMPORT_BACKUP_KEY,JSON.stringify(this.exportPayload("导入前备份")));
+      localStorage.setItem(KEY,JSON.stringify(next));
+    }catch{throw new Error("保存失败，本次未替换当前进度；原记录及内存进度保留。")}
+    this.state=next;this.storageError="";this.notifyStorage();
   }
 
   reset(){
+    const previous=this.state;
     this.state=normalizeState({createdAt:Date.now()});
-    this.save();
+    if(!this.save()){this.state=previous;throw new Error("未能保存清空操作，原进度仍保留。")}
   }
 
   claimDailyReward(){

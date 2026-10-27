@@ -1,6 +1,6 @@
-import {hasSecureEvidence} from "./v12-progress.js?v=120120";
+import {hasSecureEvidence} from "./v12-progress.js?v=120130";
 
-import {eligibleVariant,verificationOutcome} from "./v12-verification.js?v=120120";
+import {eligibleVariant,verificationOutcome} from "./v12-verification.js?v=120130";
 
 const courses=Array.isArray(window.MATH_COURSES)?window.MATH_COURSES:[];
 const banks=window.MATH_QUESTIONS||{};
@@ -440,10 +440,18 @@ function sameMultiplicationFactors(expected,actual){
     &&Math.abs(left.factors[1]-right.factors[1])<=1e-9
     &&Math.abs(left.product-right.product)<=1e-9;
 }
+export function parseNumericAnswer(value){
+  if(typeof value!=="string"&&typeof value!=="number")return null;
+  const text=String(value).trim().replace(/[０-９]/g,char=>String(char.charCodeAt(0)-65296)).replace(/^[−－]/,"-");
+  if(!/^[+-]?\d+(?:\.\d+)?$/.test(text))return null;
+  const number=Number(text);
+  return Number.isFinite(number)?number:null;
+}
+
 export function compareAnswer(descriptor,entry){
-  if(!descriptor?.supported)return false;
-  if(descriptor.type==="number")return Number(entry.value)===descriptor.value;
-  if(descriptor.type==="compound")return descriptor.values.every((value,index)=>Number(entry.values?.[index])===value);
+  if(!descriptor?.supported||!entry)return false;
+  if(descriptor.type==="number")return parseNumericAnswer(entry.value)===descriptor.value;
+  if(descriptor.type==="compound")return Array.isArray(entry.values)&&entry.values.length===descriptor.values.length&&descriptor.values.every((value,index)=>parseNumericAnswer(entry.values[index])===value);
   if(descriptor.type==="relation")return normalizeExpression(entry.value)===descriptor.value;
   if(descriptor.type==="expression"){
     const entered=normalizeExpression(entry.value);
@@ -477,6 +485,8 @@ export class LearningEngine{
     this.byQid=new Map();
     this.byCourse=new Map();
     this.bySkill=new Map();
+    this.byUnit=new Map();
+    this.unitsByCourse=new Map();
     this.rawQuestionCount=0;
     this.invalidQuestionsRemoved=0;
     this.exactDuplicatesRemoved=0;
@@ -515,6 +525,16 @@ export class LearningEngine{
       }
       this.byCourse.set(course.id,questions);
     }
+    for(const q of this.catalog){
+      q.unitId=JSON.stringify([q.courseId,q.skillId,q.template]);
+      if(!this.byUnit.has(q.unitId)){
+        const unit={id:q.unitId,courseId:q.courseId,questions:[]};
+        this.byUnit.set(q.unitId,unit);
+        if(!this.unitsByCourse.has(q.courseId))this.unitsByCourse.set(q.courseId,[]);
+        this.unitsByCourse.get(q.courseId).push(unit);
+      }
+      this.byUnit.get(q.unitId).questions.push(q);
+    }
   }
 
   getCourses(grade){
@@ -533,7 +553,8 @@ export class LearningEngine{
 
   verificationVariant(source,excluded=new Set()){
     const variants=(this.bySkill.get(source.skillId)||[]).filter(q=>eligibleVariant(source,q,excluded)&&answerDescriptor(q).supported);
-    return shuffle(variants)[0]||null;
+    const unseen=variants.filter(q=>!this.store.state.questionStats?.[q.qid]?.attempts);
+    return shuffle(unseen.length?unseen:variants)[0]||null;
   }
 
   queueVerification(session,item,index){
@@ -563,7 +584,8 @@ export class LearningEngine{
       if(task.status==="passed")continue;
       const source=this.getQuestion(task.sourceQid);
       if(!source)continue;
-      const variant=this.verificationVariant(source,new Set(items.map(row=>row.question.qid)));
+      const excluded=new Set([...items.map(row=>row.question.qid),task.variantQid,...(task.history||[]).map(row=>row.qid)].filter(Boolean));
+      const variant=this.verificationVariant(source,excluded);
       if(!variant){task.status="unavailable";continue}
       items.push({id:`verify:${source.qid}:${variant.qid}`,stage:"verification",example:false,question:variant,verificationOf:source.qid});
       if(items.length>=4)break;
@@ -578,38 +600,54 @@ export class LearningEngine{
 
   learningRoute(courseId){
     const questions=this.byCourse.get(courseId)||[];
-    const skills=[...new Set(questions.map(q=>q.skillId))];
-    const secure=skills.filter(id=>this.skillSecure(id));
+    const units=this.unitsByCourse.get(courseId)||[];
+    const secure=units.filter(unit=>this.questionSecure(unit.questions[0]));
     const due=questions.some(q=>this.isDue(q.qid));
-    return {skills:skills.length,secure:secure.length,compact:Boolean(skills.length&&secure.length===skills.length&&!due)};
+    return {skills:units.length,secure:secure.length,compact:Boolean(units.length&&secure.length===units.length&&!due)};
   }
 
   skillMastery(skillId){
     return mastery(this.store.state.skillStats[skillId]);
   }
 
+  questionSecure(q){
+    return hasSecureEvidence(this.store.state.unitStats?.[q.unitId]);
+  }
+
+  unitPerformance(unit){
+    const aggregate={attempts:0,firstCorrect:0,recovered:0,hints:0,stage:{transfer:{attempts:0,correct:0}}};
+    for(const q of unit.questions){
+      const stats=this.store.state.questionStats[q.qid];
+      if(!stats)continue;
+      for(const key of ["attempts","recovered","hints"])aggregate[key]+=Number(stats[key]||0);
+      aggregate.firstCorrect+=Number(stats.firstCorrect??stats.correct??0);
+      aggregate.stage.transfer.attempts+=Number(stats.stage?.transfer?.attempts||0);
+      aggregate.stage.transfer.correct+=Number(stats.stage?.transfer?.correct||0);
+    }
+    return aggregate;
+  }
+
+  courseCoverage(courseId){
+    const units=this.unitsByCourse.get(courseId)||[];
+    const practiced=units.filter(unit=>unit.questions.some(q=>Number(this.store.state.questionStats[q.qid]?.attempts||0)>0));
+    return {total:units.length,practiced:practiced.length,secure:units.filter(unit=>this.questionSecure(unit.questions[0])).length};
+  }
+
   courseMastery(courseId){
-    const skills=[...this.bySkill.keys()].filter(id=>id.startsWith(courseId+"::"));
-    const practiced=skills
-      .map(id=>({id,stats:this.store.state.skillStats[id]}))
-      .filter(item=>item.stats?.attempts);
-    if(!practiced.length)return mastery(this.store.state.courseStats[courseId]);
-    const attempts=practiced.reduce((sum,item)=>sum+Number(item.stats.attempts||0),0);
-    return attempts?Math.round(practiced.reduce((sum,item)=>sum+mastery(item.stats)*Number(item.stats.attempts||0),0)/attempts):0;
+    const units=this.unitsByCourse.get(courseId)||[];
+    return units.length?Math.round(units.reduce((sum,unit)=>sum+mastery(this.unitPerformance(unit)),0)/units.length):0;
   }
 
   overallMastery(){
-    const practiced=Object.values(this.store.state.skillStats).filter(stats=>stats?.attempts);
-    if(!practiced.length)return 0;
-    const attempts=practiced.reduce((sum,stats)=>sum+Number(stats.attempts||0),0);
-    return attempts?Math.round(practiced.reduce((sum,stats)=>sum+mastery(stats)*Number(stats.attempts||0),0)/attempts):0;
+    const gradeCourses=this.getCourses(this.store.state.profile.grade);
+    return gradeCourses.length?Math.round(gradeCourses.reduce((sum,course)=>sum+this.courseMastery(course.id),0)/gradeCourses.length):0;
   }
 
   courseStatus(courseId){
     const score=this.courseMastery(courseId);
     const stats=this.store.state.courseStats[courseId]||{};
     if(!stats.attempts)return {level:"未开始",score,ready:this.prerequisitesMet(courseId)};
-    if(score>=85&&Number(stats.transferCorrect||0)>=2)return {level:"已掌握",score,ready:true};
+    if(score>=85&&this.courseCoverage(courseId).practiced===this.courseCoverage(courseId).total&&Number(stats.transferCorrect||0)>=2)return {level:"已掌握",score,ready:true};
     if(score>=65)return {level:"巩固中",score,ready:true};
     return {level:"学习中",score,ready:true};
   }
@@ -623,7 +661,7 @@ export class LearningEngine{
     const count=Math.max(8,Number(total||12));
     const guided=Math.max(2,Math.round(count*.25));
     const transfer=Math.max(2,Math.round(count*.25));
-    const independent=Math.max(3,count-guided-transfer);
+    const independent=Math.max(2,count-guided-transfer);
     return {teach:1,guided,independent,transfer};
   }
 
@@ -680,7 +718,7 @@ export class LearningEngine{
 
   pickForStage(courseId,stage,count,selected=[]){
     const all=this.byCourse.get(courseId)||[];
-    const eligible=all.filter(q=>stage==="transfer"||!this.skillSecure(q.skillId)||this.isDue(q.qid));
+    const eligible=all.filter(q=>stage==="transfer"||!this.questionSecure(q)||this.isDue(q.qid));
     const sorted=eligible
       .filter(q=>!selected.some(item=>item.qid===q.qid))
       .map(q=>({q,score:this.candidateScore(q,stage)}))
@@ -719,7 +757,7 @@ export class LearningEngine{
       .map(q=>({q,score:this.candidateScore(q,"independent")+(this.isDue(q.qid)?45:0)}))
       .sort((a,b)=>b.score-a.score)
       .map(item=>item.q);
-    const dueOrWeak=sorted.filter(q=>!this.skillSecure(q.skillId)||this.isDue(q.qid));
+    const dueOrWeak=sorted.filter(q=>!this.questionSecure(q)||this.isDue(q.qid));
     const questions=this.pickDiverse(dueOrWeak.length?dueOrWeak:sorted,dueOrWeak.length?count:Math.min(4,count));
     return {
       id:`adaptive:${courseId}:${Date.now()}`,
@@ -911,6 +949,7 @@ export class LearningEngine{
 
   recordResult(item,result){
     if(item.example)return;
+    this.store.ensureToday?.();
     const q=item.question;
     const elapsed=Math.max(0,Math.min(600000,Number(result.elapsedMs||0)));
     const firstCorrect=Boolean(result.firstCorrect);
@@ -922,21 +961,24 @@ export class LearningEngine{
     const questionStats=state.questionStats[q.qid]||(state.questionStats[q.qid]={attempts:0,firstCorrect:0,recovered:0,wrong:0,hints:0,totalMs:0,lastAt:0});
     for(const stats of [courseStats,skillStats,questionStats]){
       stats.attempts=Number(stats.attempts||0)+1;
-      stats.firstCorrect=Number(stats.firstCorrect||stats.correct||0)+(firstCorrect?1:0);
+      stats.firstCorrect=Number(stats.firstCorrect??stats.correct??0)+(firstCorrect?1:0);
       stats.recovered=Number(stats.recovered||0)+(recovered?1:0);
-      stats.hints=Number(stats.hints||stats.help||0)+Number(result.hints||0);
+      stats.hints=Number(stats.hints??stats.help??0)+Number(result.hints||0);
       stats.totalMs=Number(stats.totalMs||0)+elapsed;
     }
     const independent=["independent","transfer","diagnostic","review","verification"].includes(item.stage);
     const evidence={qid:q.qid,at:Date.now(),stage:item.stage,independent,firstCorrect,hints:Number(result.hints||0)};
     skillStats.recentEvidence=[...(skillStats.recentEvidence||[]),evidence].slice(-12);
+    state.unitStats=state.unitStats||{};
+    const unitStats=state.unitStats[q.unitId]||(state.unitStats[q.unitId]={});
+    unitStats.recentEvidence=[...(unitStats.recentEvidence||[]),evidence].slice(-12);
     if(independent){
       state.stats.independentObserved=Number(state.stats.independentObserved||0)+1;
       if(firstCorrect&&!result.hints)state.stats.independentCorrect=Number(state.stats.independentCorrect||0)+1;
     }
     questionStats.wrong=Number(questionStats.wrong||0)+(wrong?1:0);
     questionStats.lastAt=Date.now();
-    for(const stats of [courseStats,skillStats]){
+    for(const stats of [courseStats,skillStats,questionStats]){
       stats.stage=stats.stage||{};
       const stageStats=stats.stage[item.stage]||(stats.stage[item.stage]={attempts:0,correct:0,recovered:0});
       stageStats.attempts++;
@@ -1007,6 +1049,9 @@ export class LearningEngine{
   }
 
   completeSession(session,summary){
+    if(session.completedAt)return false;
+    session.completedAt=Date.now();
+    this.store.ensureToday?.();
     const state=this.store.state;
     const courseId=session.course.id;
     if(this.courseById.has(courseId)){
@@ -1015,7 +1060,7 @@ export class LearningEngine{
       stats.lastAt=Date.now();
       stats.lastScore=summary.score;
       stats.best=Math.max(Number(stats.best||0),summary.score);
-      if(this.courseMastery(courseId)>=85&&!state.completedCourses.includes(courseId))state.completedCourses.push(courseId);
+      if(this.courseStatus(courseId).level==="已掌握"&&!state.completedCourses.includes(courseId))state.completedCourses.push(courseId);
     }
     state.stats.completedSessions++;
     state.stats.stars+=5;

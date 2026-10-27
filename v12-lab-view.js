@@ -1,5 +1,5 @@
-import {createLab,restoreLab,changeLab,labSolved,labRecord,balanceDifference} from "./v12-lab.js?v=120120";
-import {escapeHTML} from "./v12-tutor.js?v=120120";
+import {createLab,restoreLab,changeLab,labSolved,labRecord,balanceDifference} from "./v12-lab.js?v=120130";
+import {escapeHTML} from "./v12-tutor.js?v=120130";
 
 export function mountLab(root,{draft=null,type="substitution",onSave=()=>{}}={}){
   let lab=restoreLab(draft)||createLab(type);
@@ -21,7 +21,8 @@ export function mountLab(root,{draft=null,type="substitution",onSave=()=>{}}={})
       <div class="lab-token-board" role="group" aria-label="当前数量表示">${lab.board.tokens.map(token=>token.kind==="unit"?'<span class="lab-unit lab-unit-static" aria-label="1个单位块">1</span>':`<button type="button" class="lab-fruit" data-lab-action="expand" data-token="${token.id}" data-drag-expand="${token.id}" data-focus="fruit-${token.id}" aria-label="把这个${token.kind==="pear"?"梨换成等量苹果":"苹果换成等量单位块"}">${token.kind==="pear"?"🍐":"🍎"}<small>点我代换</small></button>`).join("")}</div>
       <div class="lab-exchange-zone" data-expand-zone="true">也可以把水果拖到这里，换成等量的小份</div>
       <label for="labAnswer">最后共有几个单位块？</label>`:`
-      <p>左盘有1个🍎和${lab.c}个单位块，右盘有${lab.a+lab.c}个单位块。请保持等量，最后让左盘只剩1个🍎。</p>
+      <p>起初，左盘有1个🍎和${lab.c}个单位块，右盘有${lab.a+lab.c}个单位块。请保持等量，最后让左盘只剩1个🍎。</p>
+      <button type="button" id="labPalette" class="lab-palette" data-drag-palette="true" data-focus="palette" aria-pressed="${selectedUnit}">🧱 单位块1：拖入盘中，或点选后选择左/右盘</button>
       <div class="lab-scale" aria-label="${balanceState}"><div class="lab-beam" style="--lab-tilt:${diff===0?0:diff>0?-6:6}deg"></div><div class="lab-stand"></div></div>
       <p class="lab-balance-status" aria-live="polite">${balanceState}</p>
       <div class="lab-pans">${["left","right"].map(side=>{
@@ -30,7 +31,6 @@ export function mountLab(root,{draft=null,type="substitution",onSave=()=>{}}={})
         return `<section class="lab-pan" data-drop-side="${side}" style="--lab-down:${down}px" aria-label="${side==="left"?"左":"右"}盘"><b>${side==="left"?"左盘 · 1个🍎":"右盘"}</b><div class="lab-pan-tokens">${side==="left"?'<span class="lab-apple" aria-label="一个待求数值的苹果">🍎</span>':""}${Array.from({length:n},(_,i)=>unit(side,i)).join("")||'<span class="lab-empty">暂时没有单位块</span>'}</div><small>${n}个单位块${side==="left"?"，还有1个苹果":""}</small><div class="lab-pan-actions">${action("加1","add",`data-side="${side}"`)}${action("拿走1","remove",`data-side="${side}"`)}</div><button type="button" data-place-side="${side}" data-focus="place-${side}" ${selectedUnit?"":"disabled"}>把选中的1放到这里</button></section>`;
       }).join("")}</div>
       <div class="lab-both">${action("两边同时加1","bothAdd")}${action("两边同时拿走1","bothRemove")}</div>
-      <button type="button" id="labPalette" class="lab-palette" data-drag-palette="true" data-focus="palette" aria-pressed="${selectedUnit}">🧱 单位块1：拖入盘中，或点选后选择左/右盘</button>
       <label for="labAnswer">一个🍎等于几个单位块？</label>`;
     root.innerHTML=`<div class="lab-workshop"><div class="lab-tabs"><button type="button" data-lab-mode="substitution" aria-pressed="${lab.type==="substitution"}">🍐 逐层代换</button><button type="button" data-lab-mode="balance" aria-pressed="${lab.type==="balance"}">⚖️ 等式天平</button></div><small>图示练习 · 不限时 · 不计入独立答题正确率</small>${board}<div class="lab-answer-row"><input id="labAnswer" inputmode="numeric" autocomplete="off" maxlength="8" value="${escapeHTML(lab.answer)}"><button type="button" id="labCheck">检查我的发现</button></div><p id="labStatus" role="status" aria-live="polite">${escapeHTML(message)}</p><div class="lab-controls"><button type="button" data-lab-action="undo" data-focus="undo" ${lab.history.length?"":"disabled"}>↶ 撤回一步</button><button type="button" id="labHint">给我一个提示</button><button type="button" id="labNew">换一题</button></div><label for="labNote">我发现了什么？（可由家长代记）</label><textarea id="labNote" rows="3" maxlength="500" placeholder="我发现两边同时拿走相同数量……">${escapeHTML(lab.note)}</textarea><button type="button" id="labSave">保存图示学习记录</button><small id="labSaved" role="status">操作自动保留，关闭后可以继续。文字想法不自动判分。</small><details><summary>看看刚才的操作</summary><ol>${lab.events.slice(-8).map(event=>`<li>${escapeHTML(event.text)}</li>`).join("")||"<li>还没有操作</li>"}</ol></details></div>`;
     root.querySelector("#labAnswer").oninput=event=>{lab.answer=event.target.value.slice(0,8);lab.completed=false;persist()};

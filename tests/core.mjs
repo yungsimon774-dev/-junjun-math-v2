@@ -23,6 +23,7 @@ assert.equal(hasSecureEvidence({recentEvidence:proof}),true);
 for(const evidence of [proof.slice(0,4),proof.map(r=>({...r,qid:'same'})),proof.map(r=>({...r,hints:1})),proof.map(r=>({...r,stage:'independent'})),proof.map(r=>({...r,at:Date.now()-15*86400000})),[...proof.slice(0,4),{...proof[4],firstCorrect:false}]])assert.equal(hasSecureEvidence({recentEvidence:evidence}),false);
 const skills=[...new Set(engine.byCourse.get('g1u2').map(q=>q.skillId))];
 for(const id of skills)store.state.skillStats[id]={recentEvidence:proof};
+for(const unit of engine.unitsByCourse.get("g1u2"))store.state.unitStats[unit.id]={recentEvidence:proof};
 const compact=engine.buildLearningSession('g1u2');
 assert.equal(compact.items.length,4);assert.equal(compact.items.every(item=>item.stage==='transfer'),true);
 const q=compact.items[0].question;

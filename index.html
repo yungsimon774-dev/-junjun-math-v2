@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#2468e8">
   <title>峻峻数学大冒险 V12</title>
-  <link rel="manifest" href="./manifest.json?v=120120">
-  <link rel="stylesheet" href="./v12-style.css?v=120120">
+  <link rel="manifest" href="./manifest.json?v=120130">
+  <link rel="stylesheet" href="./v12-style.css?v=120130">
 </head>
 <body>
   <div class="sky" aria-hidden="true">
@@ -28,7 +28,7 @@
       <div class="brand">
         <small>峻峻</small>
         <h1>数学大冒险</h1>
-        <span id="version">V12长期版 · Build012 · 动手图示与等量实验版</span>
+        <span id="version">V12长期版 · Build013 · 综合质量验证版</span>
       </div>
       <div class="hero-actions">
         <button id="voiceTest" aria-label="试听普通话">🔊<span>普通话</span></button>
@@ -37,7 +37,7 @@
       <div class="stats">
         <div><span>⭐</span><b id="statStars">0</b><small>星星</small></div>
         <div><span>🎯</span><b id="statAccuracy">—</b><small>首次正确</small></div>
-        <div><span>🧠</span><b id="statMastery">—</b><small>掌握度</small></div>
+        <div><span>🧠</span><b id="statMastery">—</b><small>本年级进展</small></div>
         <div><span>🔁</span><b id="statDue">0</b><small>待复习</small></div>
       </div>
       <div id="voiceStatus" class="voice-status">正在检测普通话系统语音…</div>
@@ -51,6 +51,9 @@
     </nav>
 
     <div id="loadError" class="load-error hidden"></div>
+    <div id="storageStatus" class="system-notice hidden" role="status"></div>
+    <div id="offlineStatus" class="system-notice hidden" role="status"></div>
+    <div id="updateNotice" class="system-notice hidden"><span>发现新版本，可在本轮学习结束后更新。</span><button id="applyUpdate">更新并重新载入</button></div>
 
     <section id="home" class="panel active">
       <article class="smart-plan-card">
@@ -169,7 +172,7 @@
 
     <section id="report" class="panel">
       <div class="panel-title"><div><span>📊</span><h2>家长学习报告</h2></div><small>首次作答与提示次数分开统计</small></div>
-      <div id="reportStats" class="report-stats"></div>
+      <div id="reportStats" class="report-stats"></div><p class="progress-explanation">课程进展按全部题目结构平均，未练结构计0；这是练习进展估计，不是能力测量。旧成绩保留，新口径可能比旧版低。</p>
       <article class="report-card">
         <h3>最近7天学习趋势</h3>
         <div id="trendChart" class="trend-chart"></div>
@@ -194,6 +197,8 @@
       <div class="report-actions">
         <button id="exportRecord">📤 导出记录</button>
         <button id="importRecord">📥 导入记录</button>
+        <button id="restoreImport" class="hidden">恢复导入前备份</button>
+        <button id="exportRecovery" class="hidden">导出异常记录原文</button>
         <button id="resetRecord">清除记录</button>
         <input id="recordFile" class="hidden" type="file" accept="application/json,.json">
       </div>
@@ -211,15 +216,14 @@
     </section>
   </div>
 
-  <script src="./v12-config.js?v=120120"></script>
-  <script src="./courses.js?v=120120"></script>
-  <script src="./v12-bank-foundation.js?v=120120"></script>
-  <script src="./v12-bank-application.js?v=120120"></script>
-  <script src="./v12-bank-visual.js?v=120120"></script>
-  <script src="./v12-bank-symbol.js?v=120120"></script>
-  <script src="./v12-bank-life.js?v=120120"></script>
-  <script src="./v12-skill-map.js?v=120120"></script>
-  <script type="module" src="./v12-app.js?v=120120"></script>
-  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js?v=120120").catch(()=>{})}</script>
+  <script src="./v12-config.js?v=120130"></script>
+  <script src="./courses.js?v=120130"></script>
+  <script src="./v12-bank-foundation.js?v=120130"></script>
+  <script src="./v12-bank-application.js?v=120130"></script>
+  <script src="./v12-bank-visual.js?v=120130"></script>
+  <script src="./v12-bank-symbol.js?v=120130"></script>
+  <script src="./v12-bank-life.js?v=120130"></script>
+  <script src="./v12-skill-map.js?v=120130"></script>
+  <script type="module" src="./v12-app.js?v=120130"></script>
 </body>
 </html>
