@@ -1,4 +1,6 @@
-import {hasSecureEvidence} from "./v12-progress.js?v=120100";
+import {hasSecureEvidence} from "./v12-progress.js?v=120110";
+
+import {eligibleVariant,verificationOutcome} from "./v12-verification.js?v=120110";
 
 const courses=Array.isArray(window.MATH_COURSES)?window.MATH_COURSES:[];
 const banks=window.MATH_QUESTIONS||{};
@@ -529,6 +531,47 @@ export class LearningEngine{
     return this.byQid.get(qid)||null;
   }
 
+  verificationVariant(source,excluded=new Set()){
+    const variants=(this.bySkill.get(source.skillId)||[]).filter(q=>eligibleVariant(source,q,excluded)&&answerDescriptor(q).supported);
+    return shuffle(variants)[0]||null;
+  }
+
+  queueVerification(session,item,index){
+    if(item.example||item.stage==="verification"||session.type==="diagnostic")return null;
+    const source=item.question;
+    const tasks=this.store.state.verificationTasks||(this.store.state.verificationTasks=[]);
+    const task={sourceQid:source.qid,courseId:source.courseId,prompt:source.prompt,status:"pending",at:Date.now(),sessionId:session.id};
+    const previous=tasks.findIndex(row=>row.sourceQid===source.qid);
+    if(previous>=0)tasks.splice(previous,1);
+    tasks.unshift(task);
+    // Keep all unfinished tasks; bound completed history only.
+    this.store.state.verificationTasks=[...tasks.filter(row=>row.status!=="passed"),...tasks.filter(row=>row.status==="passed").slice(0,40)];
+    if((session.verificationAdded||0)>=2){this.store.save();return task}
+    const excluded=new Set(session.items.map(row=>row.question.qid));
+    const variant=this.verificationVariant(source,excluded);
+    if(!variant){task.status="unavailable";this.store.save();return task}
+    const check={id:`verify:${source.qid}:${variant.qid}`,stage:"verification",example:false,question:variant,verificationOf:source.qid};
+    session.items.splice(Math.min(index+2,session.items.length),0,check);
+    session.verificationAdded=Number(session.verificationAdded||0)+1;
+    task.variantQid=variant.qid;
+    this.store.save();return task;
+  }
+
+  buildVerificationSession(){
+    const items=[];
+    for(const task of this.store.state.verificationTasks||[]){
+      if(task.status==="passed")continue;
+      const source=this.getQuestion(task.sourceQid);
+      if(!source)continue;
+      const variant=this.verificationVariant(source,new Set(items.map(row=>row.question.qid)));
+      if(!variant){task.status="unavailable";continue}
+      items.push({id:`verify:${source.qid}:${variant.qid}`,stage:"verification",example:false,question:variant,verificationOf:source.qid});
+      if(items.length>=4)break;
+    }
+    this.store.save();
+    return {id:`verification:${Date.now()}`,type:"verification",course:{id:"verification",title:"纠错后的独立验证",icon:"🔎"},items,startedAt:Date.now()};
+  }
+
   skillSecure(skillId){
     return hasSecureEvidence(this.store.state.skillStats[skillId]);
   }
@@ -884,7 +927,7 @@ export class LearningEngine{
       stats.hints=Number(stats.hints||stats.help||0)+Number(result.hints||0);
       stats.totalMs=Number(stats.totalMs||0)+elapsed;
     }
-    const independent=["independent","transfer","diagnostic","review"].includes(item.stage);
+    const independent=["independent","transfer","diagnostic","review","verification"].includes(item.stage);
     const evidence={qid:q.qid,at:Date.now(),stage:item.stage,independent,firstCorrect,hints:Number(result.hints||0)};
     skillStats.recentEvidence=[...(skillStats.recentEvidence||[]),evidence].slice(-12);
     if(independent){
@@ -944,6 +987,20 @@ export class LearningEngine{
     if(firstCorrect&&!result.hints&&independent){
       const reviewed=item.reviewOriginalQid||q.qid;
       state.mistakes=state.mistakes.filter(mistake=>mistake.qid!==reviewed);
+    }
+    if(item.verificationOf){
+      const task=(state.verificationTasks||[]).find(row=>row.sourceQid===item.verificationOf);
+      if(task){
+        task.status=verificationOutcome(result);
+        task.checkedAt=Date.now();
+        task.variantQid=q.qid;
+        task.history=[...(task.history||[]),{qid:q.qid,status:task.status,at:task.checkedAt}].slice(-10);
+        if(task.status==="passed"){
+          const source=this.getQuestion(item.verificationOf);
+          if(source)this.scheduleReview(source,5);
+          state.mistakes=state.mistakes.filter(row=>row.qid!==item.verificationOf);
+        }
+      }
     }
     this.store.save();
     return {skillMastery:this.skillMastery(q.skillId),courseMastery:this.courseMastery(q.courseId),quality};
