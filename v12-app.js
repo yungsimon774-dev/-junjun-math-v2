@@ -347,7 +347,9 @@ function showItem(){
   parts=["",""];
   activePart=0;
   currentDescriptor=answerDescriptor(q);
-  currentEquationPlan=store.state.settings.equationPractice?equationPlan(q):null;
+  // Printed one-step calculations only require the result, never retyping the expression.
+  const directArithmetic=/^\s*[0-9０-９]+\s*[+＋\-−－×xX*÷／/]\s*[0-9０-９]+\s*[=＝]\s*[?？＿_]?\s*$/.test(String(q.prompt||""));
+  currentEquationPlan=store.state.settings.equationPractice&&!directArithmetic?equationPlan(q):null;
   currentMode=chooseAnswerMode(item);
   $("#sessionType").textContent=session.type==="learning"?(session.route?.compact?"已掌握，直接迁移挑战":"四阶段学习"):session.type==="diagnostic"?"能力诊断":session.type==="review"?"间隔复习":session.type==="random"?"随机练习":"智能强化";
   $("#gameTitle").textContent=`${session.course.icon} ${session.course.title}`;
