@@ -798,10 +798,10 @@ export class LearningEngine{
         const prompt=String(q.prompt||"");
         // Exclude mixed operations, brackets, division, advanced algebra and challenge tasks.
         if(/[()（）÷]/.test(prompt)||/未知数|方程|奥数|周期|余数|周长|两步|三步|至少|最多/.test(prompt))return false;
-        if(/\\d+\\s*[×x*]\\s*\\d+\\s*[+\\-－−]|\\d+\\s*[+\\-－−]\\s*\\d+\\s*[×x*]/.test(prompt))return false;
+        if(/\d+\s*[×x*]\s*\d+\s*[+\-－−]|\d+\s*[+\-－−]\s*\d+\s*[×x*]/.test(prompt))return false;
         if(q.courseId==="g2u3"){
-          if(/[+\\-－−]/.test(prompt)||/倍数|几倍多|几倍少/.test(prompt))return false;
-          const products=[...prompt.matchAll(/(\\d+)\\s*[×x*]\\s*(\\d+)/g)];
+          if(/[+\-－−]/.test(prompt)||/倍数|几倍多|几倍少/.test(prompt))return false;
+          const products=[...prompt.matchAll(/(\d+)\s*[×x*]\s*(\d+)/g)];
           if(products.length!==1||products.some(m=>Number(m[1])>9||Number(m[2])>9||Number(m[1])<1||Number(m[2])<1))return false;
         }
         return true;
@@ -830,6 +830,26 @@ export class LearningEngine{
           chosen.push(q);usedQids.add(q.qid);
         }
       }
+      // If the imported bank is sparse, generate safe arithmetic basics instead
+      // of returning an incomplete diagnosis or reusing question IDs.
+      for(let n=0;chosen.length<15&&n<150;n++){
+        const left=2+(n*7)%29, right=1+(n*3)%9;
+        const isAdd=n%2===0, correct=isAdd?left+right:left-right;
+        if(correct<0)continue;
+        const prompt=`${left}${isAdd?"+":"−"}${right}等于多少？`;
+        const qid=`diagnostic-basic-v1:${n}`;
+        if(usedQids.has(qid))continue;
+        const options=[String(correct),String(correct+1),String(Math.max(0,correct-1)),String(correct+2)];
+        // Ensure all choices are distinct, including when correct is zero.
+        if(new Set(options).size!==4)continue;
+        const question={qid,courseId:"g1u2",courseTitle:"100以内加减法",set:"diagnostic",
+          prompt,options,answer:0,explain:`${left}${isAdd?"+":"−"}${right}=${correct}`,
+          kind:"同步训练",kindName:"同步训练",skillId:"g1u2::同步训练",difficultyRank:1,
+          template:isAdd?"# + #":"# − #",unitId:`diagnostic-basic:${n}`};
+        chosen.push(question);usedQids.add(qid);
+        this.byQid.set(qid,question);
+      }
+      if(chosen.length!==15)throw new Error("基础诊断题量不足，已停止本轮诊断");
       const diagnosticCourse={id:"diagnostic_g2",grade:2,title:"二年级上学期基础诊断",icon:"🩺",set:"diagnostic"};
       return {id:`diagnostic:2:${Date.now()}`,type:"diagnostic",course:diagnosticCourse,
         items:shuffle(chosen).map((question,index)=>({id:`diagnostic:${question.qid}:${index}`,stage:"diagnostic",example:false,question})),
