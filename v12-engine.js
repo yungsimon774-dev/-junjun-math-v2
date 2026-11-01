@@ -797,7 +797,7 @@ export class LearningEngine{
         if(!q||usedQids.has(q.qid)||q.difficultyRank>3)return false;
         const prompt=String(q.prompt||"");
         // Exclude mixed operations, brackets, division, advanced algebra and challenge tasks.
-        if(/[()（）÷]/.test(prompt)||/未知数|方程|奥数|周期|余数|周长|两步|三步|至少|最多|平均分|平分|每人分到|每组分到|可以装几组|可装几组|每.*装一组|分成几组|分给.*每人/.test(prompt))return false;
+        if(/[()（）÷]/.test(prompt)||/未知数|方程|奥数|周期|余数|周长|两步|三步|至少|最多|平均分|平分|每人分到|每组分到|可以装几组|可装几组|每.*装一组|分成几组|分给.*每人|先.*后来|先.*又|之后又|然后又|接着又/.test(prompt))return false;
         if(/\d+\s*[×x*]\s*\d+\s*[+\-－−]|\d+\s*[+\-－−]\s*\d+\s*[×x*]/.test(prompt))return false;
         if(q.courseId==="g2u3"){
           if(/[+\-－−]/.test(prompt)||/倍数|几倍多|几倍少/.test(prompt))return false;
