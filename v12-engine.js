@@ -785,34 +785,50 @@ export class LearningEngine{
     // Build018: 二年级上学期诊断，只测已学基础；进阶题保留在课程/挑战中。
     // 按领域分配15题，不以未学过的内容评定孩子能力。
     if(Number(grade)===2){
+      // Diagnose taught fundamentals, not the entire (potentially advanced) grade-2 catalog.
       const groups=[
         {ids:["g1u1"],count:3},
         {ids:["g1u2"],count:4},
-        {ids:["g1u4","g1u13"],count:3},
-        {ids:["g2u3"],count:5}
+        {ids:["g1u4","g1u13"],count:4},
+        {ids:["g2u3"],count:4}
       ];
-      const chosen=[],used=new Set();
+      const chosen=[],usedQids=new Set(),usedTemplates=new Set();
       const suitable=q=>{
-        if(!q||used.has(q.qid)||q.difficultyRank>=4)return false;
-        const s=String(q.prompt||"");
-        if(/[()（）]/.test(s)||/\d+\s*[×x*÷]\s*\d+\s*[+\-－−]/.test(s)||/[+\-－−]\s*\d+\s*[×x*÷]/.test(s))return false;
+        if(!q||usedQids.has(q.qid)||q.difficultyRank>2)return false;
+        const prompt=String(q.prompt||"");
+        // Exclude mixed operations, brackets, division, advanced algebra and challenge tasks.
+        if(/[()（）÷]/.test(prompt)||/未知数|方程|奥数|周期|余数|周长|两步|三步|至少|最多/.test(prompt))return false;
+        if(/\\d+\\s*[×x*]\\s*\\d+\\s*[+\\-－−]|\\d+\\s*[+\\-－−]\\s*\\d+\\s*[×x*]/.test(prompt))return false;
         if(q.courseId==="g2u3"){
-          const factors=[...s.matchAll(/(\d+)\s*[×x*]\s*(\d+)/g)];
-          if(factors.some(m=>Number(m[1])>9||Number(m[2])>9))return false;
-          if(/\d+\s*[÷]/.test(s))return false;
+          if(/[+\\-－−]/.test(prompt)||/倍数|几倍多|几倍少/.test(prompt))return false;
+          const products=[...prompt.matchAll(/(\\d+)\\s*[×x*]\\s*(\\d+)/g)];
+          if(products.length!==1||products.some(m=>Number(m[1])>9||Number(m[2])>9||Number(m[1])<1||Number(m[2])<1))return false;
         }
         return true;
       };
       for(const group of groups){
         const pool=shuffle(group.ids.flatMap(id=>this.byCourse.get(id)||[]).filter(suitable));
+        let added=0;
         for(const q of pool){
-          if(chosen.length>=15||group.count<=0)break;
-          chosen.push(q);used.add(q.qid);group.count--;
+          if(added===group.count)break;
+          const key=q.unitId||q.template||q.qid;
+          if(usedTemplates.has(key))continue;
+          chosen.push(q);usedQids.add(q.qid);usedTemplates.add(key);added++;
+        }
+        // Prefer diversity, but never lose core coverage just because templates repeat.
+        for(const q of pool){
+          if(added===group.count)break;
+          if(usedQids.has(q.qid))continue;
+          chosen.push(q);usedQids.add(q.qid);added++;
         }
       }
       if(chosen.length<15){
-        const fallback=shuffle(["g1u1","g1u2","g1u4","g1u13","g2u3"].flatMap(id=>this.byCourse.get(id)||[]).filter(suitable));
-        for(const q of fallback){if(chosen.length>=15)break;chosen.push(q);used.add(q.qid)}
+        const remaining=shuffle(groups.flatMap(g=>g.ids).flatMap(id=>this.byCourse.get(id)||[]).filter(suitable));
+        for(const q of remaining){
+          if(chosen.length===15)break;
+          if(usedQids.has(q.qid))continue;
+          chosen.push(q);usedQids.add(q.qid);
+        }
       }
       const diagnosticCourse={id:"diagnostic_g2",grade:2,title:"二年级上学期基础诊断",icon:"🩺",set:"diagnostic"};
       return {id:`diagnostic:2:${Date.now()}`,type:"diagnostic",course:diagnosticCourse,
