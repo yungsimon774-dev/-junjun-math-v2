@@ -3,7 +3,7 @@ import {mountVertical} from './v12-vertical-view.js?v=120170';
 import {restoreVerticalRound,verticalSummary} from './v12-vertical.js?v=120170';
 import {equationPlan,checkEquationPlan} from './v12-equation.js?v=120170';
 import {V12Store,today} from "./v12-store.js?v=120170";
-import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120170";
+import {LearningEngine,answerDescriptor,compareAnswer,normalizeExpression} from "./v12-engine.js?v=120180";
 import {buildTutor,escapeHTML} from "./v12-tutor.js?v=120170";
 
 import {independentSummary,REFLECTIONS,reflectionSummary} from "./v12-progress.js?v=120170";
