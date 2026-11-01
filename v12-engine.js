@@ -782,6 +782,43 @@ export class LearningEngine{
   }
 
   buildDiagnostic(grade){
+    // Build018: 二年级上学期诊断，只测已学基础；进阶题保留在课程/挑战中。
+    // 按领域分配15题，不以未学过的内容评定孩子能力。
+    if(Number(grade)===2){
+      const groups=[
+        {ids:["g1u1"],count:3},
+        {ids:["g1u2"],count:4},
+        {ids:["g1u4","g1u13"],count:3},
+        {ids:["g2u3"],count:5}
+      ];
+      const chosen=[],used=new Set();
+      const suitable=q=>{
+        if(!q||used.has(q.qid)||q.difficultyRank>=4)return false;
+        const s=String(q.prompt||"");
+        if(/[()（）]/.test(s)||/\d+\s*[×x*÷]\s*\d+\s*[+\-－−]/.test(s)||/[+\-－−]\s*\d+\s*[×x*÷]/.test(s))return false;
+        if(q.courseId==="g2u3"){
+          const factors=[...s.matchAll(/(\d+)\s*[×x*]\s*(\d+)/g)];
+          if(factors.some(m=>Number(m[1])>9||Number(m[2])>9))return false;
+          if(/\d+\s*[÷]/.test(s))return false;
+        }
+        return true;
+      };
+      for(const group of groups){
+        const pool=shuffle(group.ids.flatMap(id=>this.byCourse.get(id)||[]).filter(suitable));
+        for(const q of pool){
+          if(chosen.length>=15||group.count<=0)break;
+          chosen.push(q);used.add(q.qid);group.count--;
+        }
+      }
+      if(chosen.length<15){
+        const fallback=shuffle(["g1u1","g1u2","g1u4","g1u13","g2u3"].flatMap(id=>this.byCourse.get(id)||[]).filter(suitable));
+        for(const q of fallback){if(chosen.length>=15)break;chosen.push(q);used.add(q.qid)}
+      }
+      const diagnosticCourse={id:"diagnostic_g2",grade:2,title:"二年级上学期基础诊断",icon:"🩺",set:"diagnostic"};
+      return {id:`diagnostic:2:${Date.now()}`,type:"diagnostic",course:diagnosticCourse,
+        items:shuffle(chosen).map((question,index)=>({id:`diagnostic:${question.qid}:${index}`,stage:"diagnostic",example:false,question})),
+        startedAt:Date.now()};
+    }
     const gradeCourses=this.getCourses(grade);
     const domains=new Map();
     for(const course of gradeCourses){
@@ -803,13 +840,9 @@ export class LearningEngine{
       if(domainIndex>200)break;
     }
     const diagnosticCourse={id:`diagnostic_g${grade}`,grade,title:`${grade}年级能力诊断`,icon:"🩺",set:"diagnostic"};
-    return {
-      id:`diagnostic:${grade}:${Date.now()}`,
-      type:"diagnostic",
-      course:diagnosticCourse,
+    return {id:`diagnostic:${grade}:${Date.now()}`,type:"diagnostic",course:diagnosticCourse,
       items:chosen.map((question,index)=>({id:`diagnostic:${question.qid}:${index}`,stage:"diagnostic",example:false,question})),
-      startedAt:Date.now()
-    };
+      startedAt:Date.now()};
   }
 
   isDue(qid){
