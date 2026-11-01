@@ -794,7 +794,7 @@ export class LearningEngine{
       ];
       const chosen=[],usedQids=new Set(),usedTemplates=new Set();
       const suitable=q=>{
-        if(!q||usedQids.has(q.qid)||q.difficultyRank>2)return false;
+        if(!q||usedQids.has(q.qid)||q.difficultyRank>3)return false;
         const prompt=String(q.prompt||"");
         // Exclude mixed operations, brackets, division, advanced algebra and challenge tasks.
         if(/[()（）÷]/.test(prompt)||/未知数|方程|奥数|周期|余数|周长|两步|三步|至少|最多/.test(prompt))return false;
