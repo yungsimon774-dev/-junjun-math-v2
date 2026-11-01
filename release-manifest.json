@@ -1,5 +1,5 @@
 {
-  "release": "120170",
+  "release": "120180",
   "files": [
     {
       "path": "click.wav",
@@ -23,7 +23,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "075ea1a8bbe45db0bba76e9513bf700e573cfb91e6133cc8ca6526c0dabf326a"
+      "sha256": "c9e5bec11370b930b2141c7371cee46683af51686f819fbc3018dcca7d152808"
     },
     {
       "path": "manifest.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "v12-app.js",
-      "sha256": "617b4964a1b0825b95dec48162905116b19eb36ac9dae2ff40470b637f3f91ad"
+      "sha256": "3ba53b28f831ffe57238d29cfcdfcc8c1f8a577b29631893cbba2505da684108"
     },
     {
       "path": "v12-bank-application.js",
@@ -55,11 +55,11 @@
     },
     {
       "path": "v12-config.js",
-      "sha256": "e5959dc494686f9f91a0c65831fde7cadebb13b257381989e470a7aa0435defc"
+      "sha256": "ce164c55f688243e2771f114e61a6b4acb18d2ea6312ed6ea8d8df637541de0b"
     },
     {
       "path": "v12-engine.js",
-      "sha256": "5ca0ffb76a53b63a0ed29d5d80854ce712ab6c4c4ad2fdd07d43469feb1dde4b"
+      "sha256": "657aaf5fc4f75c04c2e209fb55ee1655bdf4d8b787c9cb5b0e1a9a56c380747e"
     },
     {
       "path": "v12-equation.js",
@@ -79,7 +79,7 @@
     },
     {
       "path": "v12-offline.js",
-      "sha256": "fcd260212639b161e38740074b7ebd1192694e1226e66bb88b72b8d2d9a784f8"
+      "sha256": "1b8e26b5f38567d81ce2c24b66b57f241491263a215c3fbb6d772afed7be6991"
     },
     {
       "path": "v12-open.js",
